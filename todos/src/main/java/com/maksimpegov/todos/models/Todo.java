@@ -1,5 +1,7 @@
 package com.maksimpegov.todos.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -9,6 +11,7 @@ import static javax.persistence.GenerationType.SEQUENCE;
 @Table(name = "todo", uniqueConstraints = {
 //        @UniqueConstraint(name = "todo_text_unique", columnNames = "text")
 })
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // to avoid hibernate extra properties
 public class Todo {
 
     // Adding primary key to the row
@@ -23,11 +26,11 @@ public class Todo {
     @Column(name = "text", nullable = false)
     private String text;
 
-    @Column(name = "completed", nullable = false)
-    private boolean completed;
-
     @Column(name = "user_id", nullable = false)
     private String userId;
+
+    @Column(name = "completed", nullable = false)
+    private boolean completed = false;
 
     @Column(name = "created_at", nullable = false)
     private Date createdAt;
@@ -35,26 +38,31 @@ public class Todo {
     @Column(name = "closed_at")
     private Date closedAt;
 
+    // empty constructor
     public Todo() {
     }
 
+    // constructor for creating new Todo
     public Todo(String text, String userId, Date createdAt) {
         this.text = text;
         this.userId = userId;
         this.createdAt = createdAt;
     }
 
-    public Todo(String text, String userId) {
+    // constructor for closing Todo
+    public Todo(String userId, Date completedAt) {
+        this.id = id;
+        this.closedAt = completedAt;
+    }
+
+    // constructor for updating Todo text
+    public Todo(Long id, String text, String userId) {
+        this.id = id;
         this.text = text;
-        this.userId = userId;
     }
 
     public void setText(String text) {
         this.text = text;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
     }
 
     public void setCreatedAt(Date createdAt) {
@@ -73,9 +81,7 @@ public class Todo {
         return text;
     }
 
-    public boolean isCompleted() {
-        return completed;
-    }
+
 
     public String getUserId() {
         return userId;
@@ -83,6 +89,14 @@ public class Todo {
 
     public Date getCreatedAt() {
         return createdAt;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 
     public Date getClosedAt() {
@@ -94,7 +108,6 @@ public class Todo {
         return "Todo{" +
                 "id='" + id + '\'' +
                 ", text='" + text + '\'' +
-                ", completed=" + completed +
                 ", userId='" + userId + '\'' +
                 ", createdAt=" + createdAt +
                 ", closedAt=" + closedAt +
