@@ -1,13 +1,14 @@
 package com.maksimpegov.todos.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TodoServiceResponse {
     private String status = "200";
 
-    private String message = "OK";
+    private List<Todo> todos = new ArrayList<>();
 
-    private List<Todo> todos;
+    private String message = "OK";
 
     public String getStatus() {
         return status;
@@ -15,14 +16,6 @@ public class TodoServiceResponse {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public List<Todo> getTodos() {
@@ -33,12 +26,25 @@ public class TodoServiceResponse {
         this.todos = todos;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public TodoServiceResponse() {
     }
 
     public TodoServiceResponse(String status, String message, List<Todo> todos) {
         this.status = status;
-        this.message = message;
         this.todos = todos;
+        this.message = message;
+    }
+
+    public TodoServiceResponse(String status, String message) {
+        this.status = status;
+        this.message = message;
     }
 }
