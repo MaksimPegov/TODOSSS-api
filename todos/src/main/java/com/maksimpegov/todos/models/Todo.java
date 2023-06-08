@@ -35,6 +35,9 @@ public class Todo {
     @Column(name = "created_at", nullable = false)
     private Date createdAt;
 
+    @Column(name = "updated_at")
+    private Date updatedAt;
+
     @Column(name = "closed_at")
     private Date closedAt;
 
@@ -61,46 +64,60 @@ public class Todo {
         this.text = text;
     }
 
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public void setClosedAt(Date closedAt) {
-        this.closedAt = closedAt;
+    public boolean isCompleted() {
+        return completed;
     }
 
     public Long getId() {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getText() {
         return text;
     }
 
-
+    public void setText(String text) {
+        this.text = text;
+    }
 
     public String getUserId() {
         return userId;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public boolean isCompleted() {
-        return completed;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
     }
 
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Date updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     public Date getClosedAt() {
         return closedAt;
+    }
+
+    public void setClosedAt(Date closedAt) {
+        this.closedAt = closedAt;
     }
 
     @Override

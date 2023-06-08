@@ -13,6 +13,7 @@ import java.util.List;
 public record TodosService(TodoRepository todoRepository) {
     public ProcessResponse getTodos(String userId) {
         ProcessResponse response = new ProcessResponse();
+
         try {
             List<Todo> todos = todoRepository.getAllByUserId(userId);
             response.setTodos(todos);
@@ -20,11 +21,13 @@ public record TodosService(TodoRepository todoRepository) {
         } catch (Exception e) {
             response.setStatus("404");
         }
+
         return response;
     }
 
     public ProcessResponse addTodo(Todo todo) {
         ProcessResponse response = new ProcessResponse();
+
         try {
             todo.setCreatedAt(new Date());
             todoRepository.save(todo);
@@ -34,31 +37,38 @@ public record TodosService(TodoRepository todoRepository) {
             System.out.println(e.getMessage());
             response.setStatus("400");
         }
+
         return response;
     }
 
-    public ProcessResponse editTodo(Todo newTodo) {
+    public ProcessResponse editTodo(Todo newTodoPart) {
         ProcessResponse response = new ProcessResponse();
+
         try {
-            Todo oldTodo = todoRepository.getOne(newTodo.getId());
-            oldTodo.setCreatedAt(new Date());
-            if (newTodo.getText() != null) {
-                oldTodo.setText(newTodo.getText());
-            } else if (newTodo.getClosedAt() != null) {
-                oldTodo.setClosedAt(newTodo.getClosedAt());
-            } else if (newTodo.isCompleted()) {
+            Todo oldTodo = todoRepository.getOne(newTodoPart.getId());
+            oldTodo.setUpdatedAt(new Date());
+
+            if (newTodoPart.getText() != null) {
+                oldTodo.setText(newTodoPart.getText());
+            } else if (newTodoPart.getClosedAt() != null) {
+                oldTodo.setClosedAt(newTodoPart.getClosedAt());
+            } else if (newTodoPart.isCompleted()) {
                 oldTodo.setCompleted(true);
                 oldTodo.setClosedAt(new Date());
             } else {
                 response.setStatus("400");
+                return response;
             }
+
             todoRepository.save(oldTodo);
             response.setTodos(Collections.singletonList(oldTodo));
             response.setStatus("200");
+
             return response;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             response.setStatus("404");
+
             return response;
         }
 
@@ -66,6 +76,7 @@ public record TodosService(TodoRepository todoRepository) {
 
     public ProcessResponse deleteTodo(String todoId) {
         ProcessResponse response = new ProcessResponse();
+
         try {
             if (!todoRepository.existsById(Long.parseLong(todoId))) {
                 response.setStatus("404");
@@ -78,11 +89,13 @@ public record TodosService(TodoRepository todoRepository) {
             System.out.println(e.getMessage());
             response.setStatus("404");
         }
+
         return response;
     }
 
     public ProcessResponse clearTodos(String userId) {
         ProcessResponse response = new ProcessResponse();
+
         try {
             todoRepository.deleteByUserId(userId);
             response.setStatus("200");
@@ -90,6 +103,7 @@ public record TodosService(TodoRepository todoRepository) {
             response.setStatus("404");
             System.out.println(e.getMessage());
         }
+
         return response;
     }
 }
