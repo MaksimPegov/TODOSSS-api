@@ -1,12 +1,14 @@
 package com.maksimpegov.todos.models;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProcessResponse {
-    private String status;
+    private String status = "200";
 
-    private List<Todo> todos = Collections.emptyList();
+    private List<Todo> todos = new ArrayList<>();
+
+    private String message = "OK";
 
     public String getStatus() {
         return status;
@@ -24,15 +26,25 @@ public class ProcessResponse {
         this.todos = todos;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public ProcessResponse() {
     }
 
-    public ProcessResponse(String status, List<Todo> todos) {
+    public ProcessResponse(String status, String message, List<Todo> todos) {
         this.status = status;
         this.todos = todos;
+        this.message = message;
     }
 
-    public ProcessResponse(String status) {
+    public ProcessResponse(String status, String message) {
         this.status = status;
+        this.message = message;
     }
 }

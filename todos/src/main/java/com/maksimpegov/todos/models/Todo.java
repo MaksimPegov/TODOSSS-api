@@ -52,18 +52,6 @@ public class Todo {
         this.createdAt = createdAt;
     }
 
-    // constructor for closing Todo
-    public Todo(String userId, Date completedAt) {
-        this.id = id;
-        this.closedAt = completedAt;
-    }
-
-    // constructor for updating Todo text
-    public Todo(Long id, String text, String userId) {
-        this.id = id;
-        this.text = text;
-    }
-
     public boolean isCompleted() {
         return completed;
     }

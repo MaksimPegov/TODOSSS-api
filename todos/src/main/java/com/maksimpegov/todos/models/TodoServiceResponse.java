@@ -1,31 +1,13 @@
 package com.maksimpegov.todos.models;
 
-import java.util.Collections;
 import java.util.List;
 
 public class TodoServiceResponse {
-    private String userId;
-    private String status;
-    private List<Todo> todos = Collections.emptyList();
+    private String status = "200";
 
-    public TodoServiceResponse(String userId, String status) {
-        this.userId = userId;
-        this.status = status;
-    }
+    private String message = "OK";
 
-    public TodoServiceResponse(String userId, String status, List<Todo> todos) {
-        this.userId = userId;
-        this.status = status;
-        this.todos = todos;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    private List<Todo> todos;
 
     public String getStatus() {
         return status;
@@ -35,11 +17,28 @@ public class TodoServiceResponse {
         this.status = status;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public List<Todo> getTodos() {
         return todos;
     }
 
     public void setTodos(List<Todo> todos) {
+        this.todos = todos;
+    }
+
+    public TodoServiceResponse() {
+    }
+
+    public TodoServiceResponse(String status, String message, List<Todo> todos) {
+        this.status = status;
+        this.message = message;
         this.todos = todos;
     }
 }
