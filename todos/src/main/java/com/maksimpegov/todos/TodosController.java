@@ -1,39 +1,45 @@
 package com.maksimpegov.todos;
 
-import com.maksimpegov.todos.models.Todo;
 import com.maksimpegov.todos.models.TodoServiceResponse;
+import com.maksimpegov.todos.models.Todo;
+import com.maksimpegov.todos.models.TodoControllerResponse;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/todos")
 public record TodosController(TodosService todosService) {
+
     @GetMapping(path = "{userId}")
-    public TodoServiceResponse getTodos(@PathVariable String userId) {
-        List<Todo> todos = todosService.getTodos(userId);
-        return new TodoServiceResponse(userId, "OK", todos);
+    public TodoControllerResponse getTodos(@PathVariable String userId) {
+        TodoServiceResponse response = todosService.getTodos(userId);
+        return createTodoServiceResponse(response);
     }
 
     @PostMapping()
-    public TodoServiceResponse addTodos(@RequestBody Todo todo) {
-        todo.setCreatedAt(new java.util.Date());
-        String response = todosService.addTodo(todo.getUserId(), todo);
-        System.out.println(response);
-        return new TodoServiceResponse(todo.getUserId(), response, todosService.getTodos(todo.getUserId()));
+    public TodoControllerResponse addTodos(@RequestBody Todo todo) {
+        TodoServiceResponse response = todosService.addTodo(todo);
+        return createTodoServiceResponse(response);
     }
 
-    @DeleteMapping(path = "/{userId}/{todoId}")
-    public TodoServiceResponse deleteTodos(@PathVariable String userId, @PathVariable String todoId) {
-        String response = todosService.deleteTodo(userId, todoId);
-        System.out.println(response);
-        return new TodoServiceResponse(userId, response, todosService.getTodos(userId));
+    @PatchMapping()
+    public TodoControllerResponse editTodos(@RequestBody Todo newTodoPart) {
+        TodoServiceResponse response = todosService.editTodo(newTodoPart);
+        return createTodoServiceResponse(response);
+    }
+
+    @DeleteMapping(path = "/{userId}/{todoId}") // userId may be removed in the future
+    public TodoControllerResponse deleteTodos(@PathVariable String userId, @PathVariable String todoId) {
+        TodoServiceResponse response = todosService.deleteTodo(todoId);
+        return createTodoServiceResponse(response);
     }
 
     @DeleteMapping(path = "/clear/{userId}")
-    public TodoServiceResponse clearTodos(@PathVariable String userId) {
-        String response = todosService.clearTodos(userId);
-        System.out.println(response);
-        return new TodoServiceResponse(userId, response);
+    public TodoControllerResponse clearTodos(@PathVariable String userId) {
+        TodoServiceResponse response = todosService.clearTodos(userId);
+        return createTodoServiceResponse(response);
+    }
+
+    private TodoControllerResponse createTodoServiceResponse(TodoServiceResponse response) {
+        return new TodoControllerResponse(response.getStatus(), response.getMessage(), response.getTodos());
     }
 }
