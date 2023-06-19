@@ -1,4 +1,4 @@
-package com.maksimpegov.todos.config;
+package com.maksimpegov.users.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -35,7 +35,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         userId = jwtService.getUserId(jwt);
 
         if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
+            // TODO: add user to security context
+            // will be realized in the future
         }
     }
 }

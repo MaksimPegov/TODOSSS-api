@@ -1,17 +1,18 @@
-package com.maksimpegov.todos.config;
+package com.maksimpegov.users.config;
 
-import com.maksimpegov.todos.models.TodoServiceResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
+@Component
 public class JwtService {
 
     private static final String SECRET_KEY = "A87BDAE5D4DAB6FFF72729EE1D82D";
