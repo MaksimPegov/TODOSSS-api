@@ -2,6 +2,7 @@ package com.maksimpegov.todos.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -32,5 +33,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         jwt = authHeader.substring(7);
         userId = jwtService.getUserId(jwt);
+
+        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+        }
     }
 }
