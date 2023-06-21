@@ -1,8 +1,8 @@
 package com.maksimpegov.todos;
 
-import com.maksimpegov.todos.models.TodoServiceResponse;
 import com.maksimpegov.todos.models.Todo;
 import com.maksimpegov.todos.models.TodoRepository;
+import com.maksimpegov.todos.models.TodoServiceResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -58,7 +58,7 @@ public record TodosService(TodoRepository todoRepository) {
     public TodoServiceResponse deleteTodo(String todoId) {
         try {
             if (!todoRepository.existsById(Long.parseLong(todoId))) {
-                return new TodoServiceResponse("404", "Todo with this id does not exist.");
+                return new TodoServiceResponse("404", "Todo with this id does not exist");
             }
 
             Todo deletedTodo = todoRepository.getOne(Long.parseLong(todoId));

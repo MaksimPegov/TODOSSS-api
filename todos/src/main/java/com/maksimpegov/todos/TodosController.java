@@ -1,8 +1,8 @@
 package com.maksimpegov.todos;
 
-import com.maksimpegov.todos.models.TodoServiceResponse;
 import com.maksimpegov.todos.models.Todo;
 import com.maksimpegov.todos.models.TodoControllerResponse;
+import com.maksimpegov.todos.models.TodoServiceResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

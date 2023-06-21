@@ -13,10 +13,16 @@ public class SecurityConfig {
         http
                 .authorizeRequests()
                 .anyRequest()
-                .authenticated()
+//                .authenticated()
+//                .and()
+//                .httpBasic();
+                // will be realized in the future
+                .permitAll()
                 .and()
-                .httpBasic();
+                .csrf().disable()
+                .headers().frameOptions().disable();
         return http.build();
+
     }
 
 }
