@@ -1,19 +1,24 @@
 package com.maksimpegov.users;
 
 import com.maksimpegov.users.models.User;
-import com.maksimpegov.users.models.UserRegistrationRequest;
 import com.maksimpegov.users.models.UserServiceResponse;
-import com.maksimpegov.users.models.UsersControllerResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users/v1/")
 public record UsersController(UsersService usersService) {
-    @PostMapping
-    public UserServiceResponse registerUser(@RequestBody User user) {
+    @PostMapping(path = "/register")
+    public ResponseEntity<Object> registerUser(@RequestBody User user) {
         UserServiceResponse response = usersService.registerUser(user);
-        return response;
+        return ResponseBuilder.build(response);
+    }
+
+    @PostMapping(path = "/login")
+    public UserServiceResponse loginUser(@RequestBody User user) {
+//        UserServiceResponse response = usersService.loginUser(user);
+        return null;
     }
 
     @DeleteMapping(path = "/{userId}")

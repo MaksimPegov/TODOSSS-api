@@ -18,18 +18,18 @@ public record TodosService(TodoRepository todoRepository) {
             return new TodoServiceResponse("200", "Success", todos);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new TodoServiceResponse("404", "Something went wrong. " + e.getMessage(), null);
+            return new TodoServiceResponse("404", "Something went wrong. " + e.getMessage());
         }
     }
 
     public TodoServiceResponse addTodo(Todo todo) {
         try {
             todo.setCreatedAt(new Date());
-            todoRepository.save(todo);
-            return new TodoServiceResponse("201", "Success", Collections.singletonList(todo));
+            Todo createdTodo = todoRepository.save(todo);
+            return new TodoServiceResponse("201", "Todo created", Collections.singletonList(createdTodo));
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new TodoServiceResponse("400", "Your todo is not valid. " + e.getMessage(), null);
+            return new TodoServiceResponse("400", "Your todo is not valid. " + e.getMessage());
         }
     }
 
@@ -47,8 +47,8 @@ public record TodosService(TodoRepository todoRepository) {
                 return new TodoServiceResponse("400", "Your request is not valid");
             }
 
-            todoRepository.save(oldTodo);
-            return new TodoServiceResponse("200", "Success", Collections.singletonList(oldTodo));
+            Todo newTodo = todoRepository.save(oldTodo);
+            return new TodoServiceResponse("200", "Todo was edited", Collections.singletonList(newTodo));
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new TodoServiceResponse("404", "You may provide wrong todo id or todo. " + e.getMessage());
@@ -63,7 +63,7 @@ public record TodosService(TodoRepository todoRepository) {
 
             Todo deletedTodo = todoRepository.getOne(Long.parseLong(todoId));
             todoRepository.deleteById(Long.parseLong(todoId));
-            return new TodoServiceResponse("200", "Success", Collections.singletonList(deletedTodo));
+            return new TodoServiceResponse("200", "Todo deleted", Collections.singletonList(deletedTodo));
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new TodoServiceResponse("404", "Something went wrong. " + e.getMessage());
@@ -73,7 +73,7 @@ public record TodosService(TodoRepository todoRepository) {
     public TodoServiceResponse clearTodos(String userId) {
         try {
             todoRepository.deleteByUserId(userId);
-            return new TodoServiceResponse("200", "Success");
+            return new TodoServiceResponse("200", "All todos were deleted");
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new TodoServiceResponse("404", "Todo with this id does not exist. " + e.getMessage());
