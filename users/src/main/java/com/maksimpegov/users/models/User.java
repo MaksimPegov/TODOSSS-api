@@ -46,6 +46,10 @@ public class User {
         return this.username.length() >= 3;
     }
 
+    public void hidePassword() {
+        setPassword("*".repeat(getPassword().length()));
+    }
+
     public User(String username, String password) {
         this.username = username.trim();
         this.password = password.trim();

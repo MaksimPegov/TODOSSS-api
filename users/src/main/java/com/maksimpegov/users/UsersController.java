@@ -16,9 +16,9 @@ public record UsersController(UsersService usersService) {
     }
 
     @PostMapping(path = "/login")
-    public UserServiceResponse loginUser(@RequestBody User user) {
-//        UserServiceResponse response = usersService.loginUser(user);
-        return null;
+    public ResponseEntity<Object> loginUser(@RequestBody User user) {
+        UserServiceResponse response = usersService.loginUser(user);
+        return ResponseBuilder.build(response);
     }
 
     @DeleteMapping(path = "/{userId}")
