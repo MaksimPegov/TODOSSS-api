@@ -38,6 +38,24 @@ public class UsersService {
         }
     }
 
+    public UserServiceResponse loginUser(User user) {
+        try {
+            if (user.getUsername() == null || user.getPassword() == null) {
+                return new UserServiceResponse("400", "Your request is not valid");
+            }
+            User userFromDb = usersRepository.findByUsername(user.getUsername());
+            if (userFromDb == null) {
+                return new UserServiceResponse("404", "User with this username does not exist");
+            } else if (!userFromDb.getPassword().equals(user.getPassword())) {
+                return new UserServiceResponse("401", "Wrong password");
+            }
+            userFromDb.hidePassword();
+            return new UserServiceResponse("200", "User logged in successfully", userFromDb);
+        } catch (Exception e) {
+            return new UserServiceResponse("500", "Error. " + e.getMessage());
+        }
+    }
+
     public String deleteUser(String userId) {
         restTemplate.delete("http://todos/todos/clear/" + userId);
         String response = "User " + userId + " was deleted";
