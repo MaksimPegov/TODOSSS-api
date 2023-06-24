@@ -25,9 +25,9 @@ public class UsersService {
         try {
             if (user.getUsername() == null || user.getPassword() == null) {
                 return new UserServiceResponse("400", "Your request is not valid");
-            }else if (!user.passwordValidation() || !user.usernameValidation()) {
+            } else if (!user.passwordValidation() || !user.usernameValidation()) {
                 return new UserServiceResponse("400", "Username or password is not valid. Username: min 3 symbols, password: min 6 symbols)");
-            }else if (usersRepository.findByUsername(user.getUsername()) != null) {
+            } else if (usersRepository.findByUsername(user.getUsername()) != null) {
                 return new UserServiceResponse("409", "User with this username already exists");
             }
             user.setCreated_at(new Date());

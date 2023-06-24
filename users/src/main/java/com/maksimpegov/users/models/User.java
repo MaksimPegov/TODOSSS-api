@@ -2,7 +2,6 @@ package com.maksimpegov.users.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -31,12 +30,12 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private Date created_at;
 
-    public Boolean passwordValidation(){
+    public Boolean passwordValidation() {
         setPassword(password.trim());
         return this.password.length() >= 6;
     }
 
-    public Boolean usernameValidation(){
+    public Boolean usernameValidation() {
         setUsername(username.trim());
         return this.username.length() >= 3;
     }

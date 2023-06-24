@@ -9,15 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserServiceResponse {
-    private String status;
-
+public class ErrorResponse {
     private String message;
-
-    private User data;
-
-    public UserServiceResponse(String status, String message) {
-        this.status = status;
-        this.message = message;
-    }
 }

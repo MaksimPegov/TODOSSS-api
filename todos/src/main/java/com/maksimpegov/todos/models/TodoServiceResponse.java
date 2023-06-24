@@ -1,47 +1,20 @@
 package com.maksimpegov.todos.models;
 
-import java.util.ArrayList;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.List;
 
+@Getter
+@Setter
+@AllArgsConstructor
 public class TodoServiceResponse {
-    private String status = "200";
+    private String status;
 
-    private List<Todo> todos = new ArrayList<>();
+    private String message;
 
-    private String message = "OK";
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public List<Todo> getTodos() {
-        return todos;
-    }
-
-    public void setTodos(List<Todo> todos) {
-        this.todos = todos;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public TodoServiceResponse() {
-    }
-
-    public TodoServiceResponse(String status, String message, List<Todo> todos) {
-        this.status = status;
-        this.todos = todos;
-        this.message = message;
-    }
+    private List<Todo> data;
 
     public TodoServiceResponse(String status, String message) {
         this.status = status;
