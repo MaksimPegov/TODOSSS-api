@@ -12,7 +12,7 @@ import java.util.List;
 @Service
 public record TodosService(TodoRepository todoRepository) {
 
-    public TodoServiceResponse getTodos(String userId) {
+    public TodoServiceResponse getTodos(Long userId) {
         try {
             List<Todo> todos = todoRepository.getAllByUserId(userId);
             return new TodoServiceResponse("200", "Success", todos);
@@ -70,7 +70,7 @@ public record TodosService(TodoRepository todoRepository) {
         }
     }
 
-    public TodoServiceResponse clearTodos(String userId) {
+    public TodoServiceResponse clearTodos(Long userId) {
         try {
             todoRepository.deleteByUserId(userId);
             return new TodoServiceResponse("200", "All todos were deleted");

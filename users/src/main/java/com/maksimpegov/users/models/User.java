@@ -2,14 +2,17 @@ package com.maksimpegov.users.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.UUID;
+
+import static javax.persistence.GenerationType.SEQUENCE;
 
 @Setter
 @Getter
+@NoArgsConstructor
 @Entity(name = "User")
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(name = "user_id_unique", columnNames = "id"),
@@ -18,8 +21,11 @@ import java.util.UUID;
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"}) // to avoid hibernate extra properties
 public class User {
     @Id
+    @SequenceGenerator(name = "user_sequence", sequenceName = "user_sequence", allocationSize = 1)
+    // creating sequence generator
+    @GeneratedValue(strategy = SEQUENCE, generator = "user_sequence") // every new user will be getting auto-increace id
     @Column(name = "id", updatable = false)
-    private String id;
+    private Long id;
 
     @Column(name = "username", nullable = false)
     private String username;
@@ -43,10 +49,6 @@ public class User {
     public User(String username, String password) {
         this.username = username.trim();
         this.password = password.trim();
-        this.id = UUID.randomUUID().toString();
     }
 
-    public User() {
-        this.id = UUID.randomUUID().toString();
-    }
 }

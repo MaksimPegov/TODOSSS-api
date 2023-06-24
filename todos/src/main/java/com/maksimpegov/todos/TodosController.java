@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 public record TodosController(TodosService todosService) {
 
     @GetMapping(path = "{userId}")
-    public ResponseEntity<Object> getTodos(@PathVariable String userId) {
+    public ResponseEntity<Object> getTodos(@PathVariable Long userId) {
         TodoServiceResponse response = todosService.getTodos(userId);
         return ResponseBuilder.build(response);
     }
@@ -34,7 +34,7 @@ public record TodosController(TodosService todosService) {
     }
 
     @DeleteMapping(path = "/clear/{userId}")
-    public ResponseEntity<Object> clearTodos(@PathVariable String userId) {
+    public ResponseEntity<Object> clearTodos(@PathVariable Long userId) {
         TodoServiceResponse response = todosService.clearTodos(userId);
         return ResponseBuilder.build(response);
     }

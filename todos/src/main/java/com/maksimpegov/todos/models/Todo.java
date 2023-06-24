@@ -31,7 +31,7 @@ public class Todo {
     private String text;
 
     @Column(name = "user_id", nullable = false)
-    private String userId;
+    private Long userId;
 
     @Column(name = "completed", nullable = false)
     private boolean completed = false;
@@ -46,7 +46,7 @@ public class Todo {
     private Date closedAt;
 
     // constructor for creating new Todo
-    public Todo(String text, String userId, Date createdAt) {
+    public Todo(String text, Long userId, Date createdAt) {
         this.text = text;
         this.userId = userId;
         this.createdAt = createdAt;
