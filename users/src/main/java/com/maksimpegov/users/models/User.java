@@ -36,14 +36,18 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private Date created_at;
 
-    public Boolean passwordValidation() {
+    private Boolean passwordValidation() {
         setPassword(password.trim());
         return this.password.length() >= 6;
     }
 
-    public Boolean usernameValidation() {
+    private Boolean usernameValidation() {
         setUsername(username.trim());
         return this.username.length() >= 3;
+    }
+
+    public boolean userValidation() {
+        return passwordValidation() && usernameValidation();
     }
 
     public void hidePassword() {
