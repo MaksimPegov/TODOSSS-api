@@ -32,6 +32,7 @@ public class UsersService {
             } else if (usersRepository.findByUsername(user.getUsername()) != null) {
                 return new UserServiceResponse("409", "User with this username already exists");
             }
+
             user.setCreated_at(new Date());
             usersRepository.save(user);
             return new UserServiceResponse("201", "User created successfully");
@@ -46,13 +47,42 @@ public class UsersService {
                 return new UserServiceResponse("400", "Your request is not valid");
             }
             User userFromDb = usersRepository.findByUsername(user.getUsername());
+
             if (userFromDb == null) {
                 return new UserServiceResponse("404", "User with this username does not exist");
             } else if (!userFromDb.getPassword().equals(user.getPassword())) {
                 return new UserServiceResponse("401", "Wrong password");
             }
+
             userFromDb.hidePassword();
             return new UserServiceResponse("200", "User logged in successfully", userFromDb);
+        } catch (Exception e) {
+            return new UserServiceResponse("500", "Error. " + e.getMessage());
+        }
+    }
+
+    public UserServiceResponse editPassword(PasswordEditRequest editRequest) {
+        try {
+            if (editRequest.getUserId() == null || editRequest.getOldPassword() == null || editRequest.getNewPassword() == null) {
+                return new UserServiceResponse("400", "Your request is not valid");
+            }
+            Optional<User> userFromDb = usersRepository.findById(editRequest.getUserId());
+
+            if (userFromDb.isEmpty()) {
+                return new UserServiceResponse("404", "User does not exist");
+            }
+            User user = userFromDb.get();
+
+            if (!user.getPassword().equals(editRequest.getOldPassword())) {
+                return new UserServiceResponse("401", "You provided wrong old password. Denied");
+            }
+            user.setPassword(editRequest.getNewPassword());
+
+            if (!user.userValidation()) {
+                return new UserServiceResponse("400", "New password is not valid. Password: min 6 symbols");
+            }
+            usersRepository.save(user);
+            return new UserServiceResponse("200", "Password edited successfully");
         } catch (Exception e) {
             return new UserServiceResponse("500", "Error. " + e.getMessage());
         }
@@ -62,29 +92,5 @@ public class UsersService {
         restTemplate.delete("http://todos/todos/clear/" + userId);
         String response = "User " + userId + " was deleted";
         return response;
-    }
-
-    public UserServiceResponse editPassword(PasswordEditRequest editRequest) {
-        try {
-            if (editRequest.getUserId() == null || editRequest.getOldPassword() == null || editRequest.getNewPassword() == null) {
-                return new UserServiceResponse("400", "Your request is not valid");
-            }
-            Optional<User> userFromDb = usersRepository.findById(editRequest.getUserId());
-            if (userFromDb.isEmpty()) {
-                return new UserServiceResponse("404", "User does not exist");
-            }
-            User user = userFromDb.get();
-            if (!user.getPassword().equals(editRequest.getOldPassword())) {
-                return new UserServiceResponse("401", "You provided wrong old password. Denied");
-            }
-            user.setPassword(editRequest.getNewPassword());
-            if (!user.userValidation()) {
-                return new UserServiceResponse("400", "New password is not valid. Password: min 6 symbols");
-            }
-            usersRepository.save(user);
-            return new UserServiceResponse("200", "Password edited successfully");
-        } catch (Exception e) {
-            return new UserServiceResponse("500", "Error. " + e.getMessage());
-        }
     }
 }
