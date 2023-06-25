@@ -5,6 +5,8 @@ import com.maksimpegov.users.models.User;
 import com.maksimpegov.users.models.UserServiceResponse;
 import com.maksimpegov.users.models.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,8 +29,10 @@ public class UsersService {
         try {
             if (user.getUsername() == null || user.getPassword() == null) {
                 return new UserServiceResponse("400", "Your request is not valid");
+
             } else if (!user.userValidation()) {
                 return new UserServiceResponse("400", "Username or password is not valid. Username: min 3 symbols, password: min 6 symbols)");
+
             } else if (usersRepository.findByUsername(user.getUsername()) != null) {
                 return new UserServiceResponse("409", "User with this username already exists");
             }
@@ -88,9 +92,22 @@ public class UsersService {
         }
     }
 
-    public String deleteUser(String userId) {
-        restTemplate.delete("http://todos/todos/clear/" + userId);
-        String response = "User " + userId + " was deleted";
-        return response;
+    public UserServiceResponse deleteUser(Long userId) {
+        try {
+            if (usersRepository.findById(userId).isEmpty()) {
+                return new UserServiceResponse("404", "User does not exist");
+            }
+            String url = "http://todos/api/todos/v1/clear/" + userId;
+            // request to todos-microservice to delete all todos of this user
+            ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
+
+            if (response.getStatusCodeValue() < 400) {
+                usersRepository.deleteById(userId);
+                return new UserServiceResponse("204", "User deleted successfully");
+            }
+            return new UserServiceResponse(String.valueOf(response.getStatusCodeValue()), "Unable to delete user todos");
+        } catch (Exception e) {
+            return new UserServiceResponse("500", "Unable to delete user. " + e.getMessage());
+        }
     }
 }

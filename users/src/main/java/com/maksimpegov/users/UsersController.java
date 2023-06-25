@@ -29,9 +29,8 @@ public record UsersController(UsersService usersService) {
     }
 
     @DeleteMapping(path = "/{userId}")
-    public String deleteUser(@PathVariable String userId) {
-        String result = usersService.deleteUser(userId);
-        return result;
+    public ResponseEntity<Object> deleteUser(@PathVariable Long userId) {
+        UserServiceResponse result = usersService.deleteUser(userId);
+        return ResponseBuilder.build(result);
     }
-
 }
