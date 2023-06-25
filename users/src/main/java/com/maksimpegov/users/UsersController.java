@@ -1,5 +1,6 @@
 package com.maksimpegov.users;
 
+import com.maksimpegov.users.models.PasswordEditRequest;
 import com.maksimpegov.users.models.User;
 import com.maksimpegov.users.models.UserServiceResponse;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,12 @@ public record UsersController(UsersService usersService) {
     @PostMapping(path = "/login")
     public ResponseEntity<Object> loginUser(@RequestBody User user) {
         UserServiceResponse response = usersService.loginUser(user);
+        return ResponseBuilder.build(response);
+    }
+
+    @PatchMapping(path = "/password")
+    public ResponseEntity<Object> editPassword(@RequestBody PasswordEditRequest editRequest) {
+        UserServiceResponse response = usersService.editPassword(editRequest);
         return ResponseBuilder.build(response);
     }
 
