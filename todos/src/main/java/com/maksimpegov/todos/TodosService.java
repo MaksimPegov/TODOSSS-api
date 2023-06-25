@@ -72,7 +72,7 @@ public record TodosService(TodoRepository todoRepository) {
 
     public TodoServiceResponse clearTodos(Long userId) {
         try {
-            todoRepository.deleteByUserId(userId);
+            todoRepository.deleteTodosByUserId(userId);
             return new TodoServiceResponse("204", "All todos were deleted");
         } catch (Exception e) {
             System.out.println(e.getMessage());

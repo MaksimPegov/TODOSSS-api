@@ -16,7 +16,7 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     @Transactional
     @Modifying
     @Query("DELETE FROM Todo as t WHERE t.userId = :userId")
-    void deleteByUserId(@Param("userId") Long userId);
+    void deleteTodosByUserId(@Param("userId") Long userId);
 
     @Modifying
     @Query("SELECT t FROM Todo as t WHERE t.userId = :userId ORDER BY t.id")
