@@ -16,6 +16,7 @@ public record TodosService(TodoRepository todoRepository) {
         try {
             List<Todo> todos = todoRepository.getAllByUserId(userId);
             return new TodoServiceResponse("200", "Success", todos);
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new TodoServiceResponse("404", "Something went wrong. " + e.getMessage());
@@ -25,6 +26,10 @@ public record TodosService(TodoRepository todoRepository) {
     public TodoServiceResponse addTodo(Todo todo) {
         try {
             todo.setCreatedAt(new Date());
+            if (!todo.todoValidation()) {
+                return new TodoServiceResponse("400", "Your todo can not be empty");
+            }
+
             Todo createdTodo = todoRepository.save(todo);
             return new TodoServiceResponse("201", "Todo created", Collections.singletonList(createdTodo));
         } catch (Exception e) {
@@ -39,6 +44,10 @@ public record TodosService(TodoRepository todoRepository) {
             oldTodo.setUpdatedAt(new Date());
 
             if (newTodoPart.getText() != null) {
+                if (!newTodoPart.todoValidation()) {
+                    return new TodoServiceResponse("400", "Your todo can not be empty");
+                }
+
                 oldTodo.setText(newTodoPart.getText());
             } else if (newTodoPart.isCompleted()) {
                 oldTodo.setCompleted(true);

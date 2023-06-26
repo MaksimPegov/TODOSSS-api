@@ -45,6 +45,11 @@ public class Todo {
     @Column(name = "closed_at")
     private Date closedAt;
 
+    public Boolean todoValidation() {
+        setText(text.trim());
+        return this.text.length() > 0;
+    }
+
     // constructor for creating new Todo
     public Todo(String text, Long userId, Date createdAt) {
         this.text = text;
