@@ -72,7 +72,7 @@ public record TodosService(TodoRepository todoRepository) {
 
             Todo deletedTodo = todoRepository.getOne(Long.parseLong(todoId));
             todoRepository.deleteById(Long.parseLong(todoId));
-            return new TodoServiceResponse("200", "Todo deleted", Collections.singletonList(deletedTodo));
+            return new TodoServiceResponse("204", "Todo deleted");
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return new TodoServiceResponse("404", "Something went wrong. " + e.getMessage());
@@ -81,11 +81,11 @@ public record TodosService(TodoRepository todoRepository) {
 
     public TodoServiceResponse clearTodos(Long userId) {
         try {
-            todoRepository.deleteByUserId(userId);
-            return new TodoServiceResponse("200", "All todos were deleted");
+            todoRepository.deleteTodosByUserId(userId);
+            return new TodoServiceResponse("204", "All todos were deleted");
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new TodoServiceResponse("404", "Todo with this id does not exist. " + e.getMessage());
+            return new TodoServiceResponse("500", "Error. " + e.getMessage());
         }
     }
 }
