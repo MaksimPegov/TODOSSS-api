@@ -1,4 +1,4 @@
-package com.maksimpegov.users.models;
+package com.maksimpegov.users.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PasswordEditRequest {
+public class UserDto {
     private String username;
-    private String oldPassword;
-    private String newPassword;
+    private String password;
+
 }

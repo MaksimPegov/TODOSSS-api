@@ -1,4 +1,4 @@
-package com.maksimpegov.users.models;
+package com.maksimpegov.users.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
