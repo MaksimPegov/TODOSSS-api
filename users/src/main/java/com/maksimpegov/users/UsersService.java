@@ -7,6 +7,7 @@ import com.maksimpegov.users.user.UserDto;
 import com.maksimpegov.users.user.UserMapper;
 import com.maksimpegov.users.user.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ import java.util.Date;
 
 @Service
 public class UsersService {
+
+    @Value("${spring.properties.todos.url}")
+    String todoMicroserviceUrl;
 
     private final RestTemplate restTemplate;
     private final UsersRepository usersRepository;
@@ -111,7 +115,9 @@ public class UsersService {
                 return new UserServiceResponse("401", "Wrong password");
             }
 
-            String url = "http://todos/api/todos/v1/clear/" + user.getId();
+
+
+            String url = todoMicroserviceUrl + "/clear/" + user.getId();
             // request to todos-microservice to delete all todos of this user
             ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
 
