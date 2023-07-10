@@ -1,4 +1,4 @@
-package com.maksimpegov.todos.models;
+package com.maksimpegov.todos.todo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
