@@ -2,10 +2,17 @@ package com.maksimpegov.users;
 
 import com.maksimpegov.users.models.ErrorResponse;
 import com.maksimpegov.users.models.UserServiceResponse;
+import com.maksimpegov.users.user.UserDto;
+import com.maksimpegov.users.user.UserMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class ResponseBuilder {
+    private static final UserMapper mapper;
+
+    static {
+        mapper = UserMapper.INSTANCE;
+    }
 
     public static ResponseEntity<Object> build(UserServiceResponse response) {
         HttpStatus httpStatus = getStatusFromCode(response.getStatus());
@@ -13,7 +20,11 @@ public class ResponseBuilder {
             ErrorResponse errorResponse = new ErrorResponse(response.getMessage());
             return ResponseEntity.status(httpStatus).body(errorResponse);
         } else {
-            return ResponseEntity.status(httpStatus).body(response.getData());
+            if (response.getData() == null) {
+                return ResponseEntity.status(httpStatus).build();
+            }
+            UserDto userDto = mapper.userToUserDto(response.getData());
+            return ResponseEntity.status(httpStatus).body(userDto);
         }
     }
 

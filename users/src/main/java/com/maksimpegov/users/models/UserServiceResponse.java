@@ -1,5 +1,6 @@
 package com.maksimpegov.users.models;
 
+import com.maksimpegov.users.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,9 +1,11 @@
 package com.maksimpegov.users;
 
 import com.maksimpegov.users.models.PasswordEditRequest;
-import com.maksimpegov.users.models.User;
 import com.maksimpegov.users.models.UserServiceResponse;
-import com.maksimpegov.users.models.UsersRepository;
+import com.maksimpegov.users.user.User;
+import com.maksimpegov.users.user.UserDto;
+import com.maksimpegov.users.user.UserMapper;
+import com.maksimpegov.users.user.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -11,22 +13,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
-import java.util.Optional;
 
 @Service
 public class UsersService {
 
     private final RestTemplate restTemplate;
-    private UsersRepository usersRepository;
+    private final UsersRepository usersRepository;
+
+    private final UserMapper userDTOMapper;
 
     @Autowired
-    public UsersService(RestTemplate restTemplate, UsersRepository usersRepository) {
+    public UsersService(RestTemplate restTemplate, UsersRepository usersRepository, UserMapper userDTOMapper) {
         this.restTemplate = restTemplate;
         this.usersRepository = usersRepository;
+        this.userDTOMapper = userDTOMapper;
     }
 
     public UserServiceResponse registerUser(User user) {
         try {
+
             if (user.getUsername() == null || user.getPassword() == null) {
                 return new UserServiceResponse("400", "Your request is not valid");
 
@@ -67,42 +72,51 @@ public class UsersService {
 
     public UserServiceResponse editPassword(PasswordEditRequest editRequest) {
         try {
-            if (editRequest.getUserId() == null || editRequest.getOldPassword() == null || editRequest.getNewPassword() == null) {
+            if (editRequest.getUsername() == null || editRequest.getOldPassword() == null || editRequest.getNewPassword() == null) {
                 return new UserServiceResponse("400", "Your request is not valid");
             }
-            Optional<User> userFromDb = usersRepository.findById(editRequest.getUserId());
+            User userFromDb = usersRepository.findByUsername(editRequest.getUsername());
 
-            if (userFromDb.isEmpty()) {
+            if (userFromDb == null) {
                 return new UserServiceResponse("404", "User does not exist");
             }
-            User user = userFromDb.get();
-
-            if (!user.getPassword().equals(editRequest.getOldPassword())) {
+            if (!userFromDb.getPassword().equals(editRequest.getOldPassword())) {
                 return new UserServiceResponse("401", "You provided wrong old password. Denied");
             }
-            user.setPassword(editRequest.getNewPassword());
+            userFromDb.setPassword(editRequest.getNewPassword());
 
-            if (!user.userValidation()) {
+            if (!userFromDb.userValidation()) {
                 return new UserServiceResponse("400", "New password is not valid. Password: min 6 symbols");
             }
-            usersRepository.save(user);
+            usersRepository.save(userFromDb);
             return new UserServiceResponse("200", "Password edited successfully");
         } catch (Exception e) {
             return new UserServiceResponse("500", "Error. " + e.getMessage());
         }
     }
 
-    public UserServiceResponse deleteUser(Long userId) {
+    public UserServiceResponse deleteUser(UserDto deleteRequest) {
         try {
-            if (usersRepository.findById(userId).isEmpty()) {
+            if (deleteRequest.getUsername() == null || deleteRequest.getPassword() == null) {
+                return new UserServiceResponse("400", "Your request is not valid");
+            }
+
+            User user = usersRepository.findByUsername(deleteRequest.getUsername());
+
+            if (user == null) {
                 return new UserServiceResponse("404", "User does not exist");
             }
-            String url = "http://todos/api/todos/v1/clear/" + userId;
+
+            if (!user.getPassword().equals(deleteRequest.getPassword())) {
+                return new UserServiceResponse("401", "Wrong password");
+            }
+
+            String url = "http://todos/api/todos/v1/clear/" + user.getId();
             // request to todos-microservice to delete all todos of this user
             ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
 
             if (response.getStatusCodeValue() < 400) {
-                usersRepository.deleteById(userId);
+                usersRepository.delete(user);
                 return new UserServiceResponse("204", "User deleted successfully");
             }
             return new UserServiceResponse(String.valueOf(response.getStatusCodeValue()), "Unable to delete user todos");
