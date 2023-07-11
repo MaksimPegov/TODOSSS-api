@@ -1,5 +1,6 @@
 package com.maksimpegov.todos.models;
 
+import com.maksimpegov.todos.todo.Todo;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

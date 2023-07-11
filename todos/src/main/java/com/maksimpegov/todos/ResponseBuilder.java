@@ -2,18 +2,35 @@ package com.maksimpegov.todos;
 
 import com.maksimpegov.todos.models.ErrorResponse;
 import com.maksimpegov.todos.models.TodoServiceResponse;
+import com.maksimpegov.todos.todo.TodoMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 public class ResponseBuilder {
 
+    private static final TodoMapper mapper;
+
+    static {
+        mapper = TodoMapper.INSTANCE;
+    }
+
     public static ResponseEntity<Object> build(TodoServiceResponse response) {
         HttpStatus httpStatus = getStatusFromCode(response.getStatus());
+
         if (httpStatus.isError()) {
             ErrorResponse errorResponse = new ErrorResponse(response.getMessage());
             return ResponseEntity.status(httpStatus).body(errorResponse);
         } else {
-            return ResponseEntity.status(httpStatus).body(response.getData());
+            if (response.getData() != null) {
+                return ResponseEntity.status(httpStatus).body(
+                        response
+                                .getData()
+                                .stream()
+                                .map(mapper::map)
+                );
+
+            }
+            return ResponseEntity.status(httpStatus).build();
         }
     }
 

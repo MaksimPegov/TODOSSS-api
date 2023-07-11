@@ -1,5 +1,6 @@
-package com.maksimpegov.todos.models;
+package com.maksimpegov.todos.todo;
 
+import com.maksimpegov.todos.todo.Todo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

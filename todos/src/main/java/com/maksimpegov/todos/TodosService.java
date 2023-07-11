@@ -1,8 +1,8 @@
 package com.maksimpegov.todos;
 
-import com.maksimpegov.todos.models.Todo;
-import com.maksimpegov.todos.models.TodoRepository;
 import com.maksimpegov.todos.models.TodoServiceResponse;
+import com.maksimpegov.todos.todo.Todo;
+import com.maksimpegov.todos.todo.TodoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -23,9 +23,10 @@ public record TodosService(TodoRepository todoRepository) {
         }
     }
 
-    public TodoServiceResponse addTodo(Todo todo) {
+    public TodoServiceResponse addTodo(Todo todo, Long userId) {
         try {
             todo.setCreatedAt(new Date());
+            todo.setUserId(userId);
             if (!todo.todoValidation()) {
                 return new TodoServiceResponse("400", "Your todo can not be empty");
             }
