@@ -115,9 +115,8 @@ public class UsersService {
                 return new UserServiceResponse("401", "Wrong password");
             }
 
-
-
             String url = todoMicroserviceUrl + "/clear/" + user.getId();
+
             // request to todos-microservice to delete all todos of this user
             ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
 
