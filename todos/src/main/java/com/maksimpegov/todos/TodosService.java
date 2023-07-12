@@ -1,5 +1,6 @@
 package com.maksimpegov.todos;
 
+import com.maksimpegov.todos.models.AddTodoRequest;
 import com.maksimpegov.todos.models.TodoServiceResponse;
 import com.maksimpegov.todos.todo.Todo;
 import com.maksimpegov.todos.todo.TodoRepository;
@@ -23,8 +24,21 @@ public record TodosService(TodoRepository todoRepository) {
         }
     }
 
-    public TodoServiceResponse addTodo(Todo todo, Long userId) {
+    public TodoServiceResponse getTodoById(Long todoId) {
         try {
+            Todo todo = todoRepository.getOne(todoId);
+
+            return new TodoServiceResponse("200", "Success", Collections.singletonList(todo));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return new TodoServiceResponse("404", "Todo with this id does not exist");
+        }
+    }
+
+    public TodoServiceResponse addTodo(AddTodoRequest text, Long userId) {
+        try {
+            Todo todo = new Todo();
+            todo.setText(text.getText());
             todo.setCreatedAt(new Date());
             todo.setUserId(userId);
             if (!todo.todoValidation()) {
