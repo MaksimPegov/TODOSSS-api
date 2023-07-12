@@ -12,27 +12,18 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class ResponseBuilder {
 
-    public static ResponseEntity<Object> build(TodoServiceResponse response, Function<Todo, Object> mapper) {
+    public static ResponseEntity<?> build(TodoServiceResponse response) {
         HttpStatus httpStatus = getStatusFromCode(response.getStatus());
 
         if (httpStatus.isError()) {
             ErrorResponse errorResponse = new ErrorResponse(response.getMessage());
             return ResponseEntity.status(httpStatus).body(errorResponse);
-        } else {
-            if (response.getData() != null) {
-                return ResponseEntity.status(httpStatus).body(
-                        response
-                                .getData()
-                                .stream()
-                                .map(todo -> mapper.apply((Todo) todo))
-                );
-
-            }
-            return ResponseEntity.status(httpStatus).build();
         }
+            return ResponseEntity.status(httpStatus).build();
     }
 
     private static HttpStatus getStatusFromCode(String status) {

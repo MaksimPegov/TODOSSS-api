@@ -1,5 +1,6 @@
 package com.maksimpegov.todos;
 
+import com.maksimpegov.todos.exeption.ApiRequestException;
 import com.maksimpegov.todos.models.AddTodoRequest;
 import com.maksimpegov.todos.models.TodoServiceResponse;
 import com.maksimpegov.todos.todo.Todo;
@@ -14,14 +15,16 @@ import java.util.List;
 public record TodosService(TodoRepository todoRepository) {
 
     public TodoServiceResponse getTodos(Long userId) {
-        try {
+//        try {
             List<Todo> todos = todoRepository.getAllByUserId(userId);
-            return new TodoServiceResponse("200", "Success", todos);
+            throw new ApiRequestException("Test exception", 500);
 
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return new TodoServiceResponse("404", "Something went wrong. " + e.getMessage());
-        }
+//            return new TodoServiceResponse("200", "Success", todos);
+
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//            return new TodoServiceResponse("404", "Something went wrong. " + e.getMessage());
+//        }
     }
 
     public TodoServiceResponse getTodoById(Long todoId) {
