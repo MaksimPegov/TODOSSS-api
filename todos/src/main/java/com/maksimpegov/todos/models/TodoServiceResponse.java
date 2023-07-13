@@ -11,14 +11,11 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class TodoServiceResponse {
-    private String status;
-
-    private String message;
+    private int status;
 
     private List<Todo> data;
 
-    public TodoServiceResponse(String status, String message) {
+    public TodoServiceResponse(int status) {
         this.status = status;
-        this.message = message;
     }
 }

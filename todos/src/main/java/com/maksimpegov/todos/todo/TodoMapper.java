@@ -15,10 +15,10 @@ public interface TodoMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "text", source = "text")
     @Mapping(target = "completed", source = "completed")
-    TodoDto mapTodo(Todo source);
+    TodoDto map(Todo source);
 
     @InheritInverseConfiguration
-    Todo mapDto(TodoDto target);
+    Todo map(TodoDto target);
 
     @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", source = "id")

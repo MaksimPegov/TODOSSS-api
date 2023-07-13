@@ -15,6 +15,7 @@ public class ApiExceptionHandler {
         HttpStatus httpStatus = HttpStatus.valueOf(e.getHttpStatus());
 
         ApiException exception = new ApiException(
+                e.getError(),
                 e.getMessage(),
                 httpStatus.value(),
                 ZonedDateTime.now()

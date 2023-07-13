@@ -15,26 +15,26 @@ import java.util.List;
 public record TodosService(TodoRepository todoRepository) {
 
     public TodoServiceResponse getTodos(Long userId) {
-//        try {
+        try {
             List<Todo> todos = todoRepository.getAllByUserId(userId);
-            throw new ApiRequestException("Test exception", 500);
 
-//            return new TodoServiceResponse("200", "Success", todos);
-
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//            return new TodoServiceResponse("404", "Something went wrong. " + e.getMessage());
-//        }
+            return new TodoServiceResponse(200, todos);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new ApiRequestException("Something went wrong",  e.getMessage(), 404);
+        }
     }
 
     public TodoServiceResponse getTodoById(Long todoId) {
         try {
             Todo todo = todoRepository.getOne(todoId);
+            // to check if todo exists
+            todo.getId();
 
-            return new TodoServiceResponse("200", "Success", Collections.singletonList(todo));
+            return new TodoServiceResponse(200, Collections.singletonList(todo));
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new TodoServiceResponse("404", "Todo with this id does not exist");
+            throw new ApiRequestException("Todo with this id does not exist",  e.getMessage(), 404);
         }
     }
 
@@ -45,25 +45,33 @@ public record TodosService(TodoRepository todoRepository) {
             todo.setCreatedAt(new Date());
             todo.setUserId(userId);
             if (!todo.todoValidation()) {
-                return new TodoServiceResponse("400", "Your todo can not be empty");
+                throw new ApiRequestException("Empty todo", "You provided empty todo", 400);
             }
 
             Todo createdTodo = todoRepository.save(todo);
-            return new TodoServiceResponse("201", "Todo created", Collections.singletonList(createdTodo));
-        } catch (Exception e) {
+            return new TodoServiceResponse(201, Collections.singletonList(createdTodo));
+        } catch (ApiRequestException e) {
             System.out.println(e.getMessage());
-            return new TodoServiceResponse("400", "Your todo is not valid. " + e.getMessage());
+            throw new ApiRequestException(e.getError(),  e.getMessage(), e.getHttpStatus());
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new ApiRequestException("Something went wrong",  e.getMessage(), 404);
         }
     }
 
     public TodoServiceResponse editTodo(Todo newTodoPart) {
         try {
             Todo oldTodo = todoRepository.getOne(newTodoPart.getId());
+            if (oldTodo.getText() == null) {
+                throw new ApiRequestException("Invalid id",  "Todo with this id does not exist", 404);
+            }
+
             oldTodo.setUpdatedAt(new Date());
 
             if (newTodoPart.getText() != null) {
                 if (!newTodoPart.todoValidation()) {
-                    return new TodoServiceResponse("400", "Your todo can not be empty");
+                    throw new ApiRequestException("Empty todo", "You provided empty todo", 400);
                 }
 
                 oldTodo.setText(newTodoPart.getText());
@@ -71,39 +79,51 @@ public record TodosService(TodoRepository todoRepository) {
                 oldTodo.setCompleted(true);
                 oldTodo.setClosedAt(new Date());
             } else {
-                return new TodoServiceResponse("400", "Your request is not valid");
+                throw new ApiRequestException(
+                        "Your request is not valid",
+                        "Check your request, provide todoId and field that you want to change",
+                        400
+                );
             }
 
             Todo newTodo = todoRepository.save(oldTodo);
-            return new TodoServiceResponse("200", "Todo was edited", Collections.singletonList(newTodo));
-        } catch (Exception e) {
+            return new TodoServiceResponse(200, Collections.singletonList(newTodo));
+        } catch (ApiRequestException e) {
             System.out.println(e.getMessage());
-            return new TodoServiceResponse("404", "You may provide wrong todo id or todo. " + e.getMessage());
+            throw new ApiRequestException(e.getError(),  e.getMessage(), e.getHttpStatus());
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new ApiRequestException("Something went wrong",  e.getMessage(), 404);
         }
     }
 
     public TodoServiceResponse deleteTodo(String todoId) {
         try {
             if (!todoRepository.existsById(Long.parseLong(todoId))) {
-                return new TodoServiceResponse("404", "Todo with this id does not exist");
+                throw new ApiRequestException("Invalid id",  "Todo with this id does not exist", 404);
             }
 
             Todo deletedTodo = todoRepository.getOne(Long.parseLong(todoId));
             todoRepository.deleteById(Long.parseLong(todoId));
-            return new TodoServiceResponse("204", "Todo deleted");
-        } catch (Exception e) {
+            return new TodoServiceResponse(204);
+        } catch (ApiRequestException e) {
             System.out.println(e.getMessage());
-            return new TodoServiceResponse("404", "Something went wrong. " + e.getMessage());
+            throw new ApiRequestException(e.getError(),  e.getMessage(), e.getHttpStatus());
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new ApiRequestException("Something went wrong",  e.getMessage(), 404);
         }
     }
 
     public TodoServiceResponse clearTodos(Long userId) {
         try {
             todoRepository.deleteTodosByUserId(userId);
-            return new TodoServiceResponse("204", "All todos were deleted");
+            return new TodoServiceResponse(204);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new TodoServiceResponse("500", "Error. " + e.getMessage());
+            throw new ApiRequestException("Something went wrong",  e.getMessage(), 404);
         }
     }
 }

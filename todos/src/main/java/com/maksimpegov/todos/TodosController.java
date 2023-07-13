@@ -9,6 +9,7 @@ import com.maksimpegov.todos.todo.TodoInfo;
 import com.maksimpegov.todos.todo.TodoMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,56 +35,70 @@ public class TodosController {
 
     @ApiOperation(value = "Get all todos for a user", notes = "Provide userId in path", response = TodoDto.class, responseContainer = "List")
     @GetMapping(path = "{userId}")
-    public ResponseEntity<?> getTodos(@PathVariable Long userId) {
+    public ResponseEntity<List<TodoDto>> getTodos(@PathVariable Long userId) {
         TodoServiceResponse response = todosService.getTodos(userId);
-        mapData(response, mapper::mapTodo);
-        return ResponseBuilder.build(response);
+        List<TodoDto> data = mapToDto(response.getData());
+        HttpStatus status = getStatus(response.getStatus());
+        return ResponseEntity.status(status).body(data);
     }
 
     @ApiOperation(value = "Get todo info", notes = "Provide todoId in path", response = TodoInfo.class)
     @GetMapping(path = "/todo/{todoId}")
-    public ResponseEntity<?> getTodoInfo(@PathVariable Long todoId) {
+    public ResponseEntity<List<TodoInfo>> getTodoInfo(@PathVariable Long todoId) {
         TodoServiceResponse response = todosService.getTodoById(todoId);
-        mapData(response, mapper::mapTodo);
-        return ResponseBuilder.build(response);
+        List<TodoInfo> data = mapToTodoInfo(response.getData());
+        HttpStatus status = getStatus(response.getStatus());
+        return ResponseEntity.status(status).body(data);
     }
 
     @ApiOperation(value = "Add a todo for a user", notes = "Provide userId in path and text of todo in body", response = TodoDto.class)
     @PostMapping(path = "{userId}")
-    public ResponseEntity<?> addTodos(@RequestBody AddTodoRequest todoText, @PathVariable Long userId) {
+    public ResponseEntity<List<TodoDto>> addTodos(@RequestBody AddTodoRequest todoText, @PathVariable Long userId) {
         TodoServiceResponse response = todosService.addTodo(todoText, userId);
-        mapData(response, mapper::mapTodo);
-        return ResponseBuilder.build(response);
+        List<TodoDto> data = mapToDto(response.getData());
+        HttpStatus status = getStatus(response.getStatus());
+        return ResponseEntity.status(status).body(data);
     }
 
     @ApiOperation(value = "Edit a todo", notes = "Provide only todoId and a todo field that you want to edit in body", response = TodoDto.class)
     @PatchMapping
-    public ResponseEntity<?> editTodos(@RequestBody TodoDto newTodoPartDto) {
-        Todo newTodoPart = mapper.mapDto(newTodoPartDto);
+    public ResponseEntity<List<TodoDto>> editTodos(@RequestBody TodoDto newTodoPartDto) {
+        Todo newTodoPart = mapper.map(newTodoPartDto);
         TodoServiceResponse response = todosService.editTodo(newTodoPart);
-        mapData(response, mapper::mapTodo);
-        return ResponseBuilder.build(response);
-
+        List<TodoDto> data = mapToDto(response.getData());
+        HttpStatus status = getStatus(response.getStatus());
+        return ResponseEntity.status(status).body(data);
     }
 
     @ApiOperation(value = "Delete a todo", notes = "Provide todoId in path")
     @DeleteMapping(path = "/{userId}/{todoId}") // userId may be removed in the future
-    public ResponseEntity<?> deleteTodos(@PathVariable String userId, @PathVariable String todoId) {
-        TodoServiceResponse response = todosService.deleteTodo(todoId);
-        return ResponseBuilder.build(response);
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deleteTodos(@PathVariable String userId, @PathVariable String todoId) {
+        todosService.deleteTodo(todoId);
     }
 
     @ApiOperation(value = "Delete all todos for a user", notes = "Provide userId in path")
     @DeleteMapping(path = "/clear/{userId}")
-    public ResponseEntity<?> clearTodos(@PathVariable Long userId) {
-        TodoServiceResponse response = todosService.clearTodos(userId);
-        return ResponseBuilder.build(response);
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void clearTodos(@PathVariable Long userId) {
+        todosService.clearTodos(userId);
     }
 
-    private List<?> mapData(TodoServiceResponse response, Function<Todo, ?> mapper) {
-        if (response.getData() != null) {
-            return response.getData().stream().map(todo -> mapper.apply((Todo) todo)).collect(Collectors.toList());
+    private HttpStatus getStatus(int status) {
+        HttpStatus httpStatus;
+        try {
+            httpStatus = HttpStatus.valueOf(status);
+        } catch (NumberFormatException e) {
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         }
-        return null;
+        return httpStatus;
+    }
+
+    public List<TodoDto> mapToDto(List<Todo> todos) {
+        return todos.stream().map(mapper::map).toList();
+    }
+
+    public List<TodoInfo> mapToTodoInfo(List<Todo> todos) {
+        return todos.stream().map(mapper::mapInfo).toList();
     }
 }
