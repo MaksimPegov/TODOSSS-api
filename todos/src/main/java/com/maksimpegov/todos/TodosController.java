@@ -1,6 +1,5 @@
 package com.maksimpegov.todos;
 
-import com.maksimpegov.todos.exeption.ApiRequestException;
 import com.maksimpegov.todos.models.AddTodoRequest;
 import com.maksimpegov.todos.models.TodoServiceResponse;
 import com.maksimpegov.todos.todo.Todo;
@@ -13,11 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @RestController
 @Api(tags = "Endpoints")

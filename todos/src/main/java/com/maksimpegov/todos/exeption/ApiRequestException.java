@@ -1,6 +1,6 @@
 package com.maksimpegov.todos.exeption;
 
-public class ApiRequestException extends RuntimeException{
+public class ApiRequestException extends RuntimeException {
     private final String error;
 
     private final int HttpStatus;
