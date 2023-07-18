@@ -15,12 +15,16 @@ public interface TodoMapper {
     @Mapping(target = "id", source = "id")
     @Mapping(target = "text", source = "text")
     @Mapping(target = "completed", source = "completed")
-    @Mapping(target = "createdAt", source = "createdAt")
-    @Mapping(target = "updatedAt", source = "updatedAt")
-    @Mapping(target = "closedAt", source = "closedAt")
     TodoDto map(Todo source);
 
     @InheritInverseConfiguration
     Todo map(TodoDto target);
+
+    @BeanMapping(ignoreByDefault = true)
+    @Mapping(target = "id", source = "id")
+    @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "updatedAt", source = "updatedAt")
+    @Mapping(target = "closedAt", source = "closedAt")
+    TodoInfo mapInfo(Todo source);
 
 }
