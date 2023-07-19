@@ -21,7 +21,7 @@ public record TodosService(TodoRepository todoRepository) {
             return new TodoServiceResponse(200, todos);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new ApiRequestException("Something went wrong", e.getMessage(), 404);
+            throw new ApiRequestException("Internal Server Error", e.getMessage(), 500);
         }
     }
 
@@ -34,11 +34,10 @@ public record TodosService(TodoRepository todoRepository) {
 
             return new TodoServiceResponse(200, Collections.singletonList(todo));
         } catch (ApiRequestException e) {
-            System.out.println(e.getMessage());
-            throw new ApiRequestException(e.getError(), e.getMessage(), e.getHttpStatus());
+            throw e;
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new ApiRequestException("Todo with this id does not exist", e.getMessage(), 404);
+            throw new ApiRequestException("Internal Server Error", e.getMessage(), 500);
         }
     }
 
@@ -56,10 +55,10 @@ public record TodosService(TodoRepository todoRepository) {
             return new TodoServiceResponse(201, Collections.singletonList(createdTodo));
         } catch (ApiRequestException e) {
             System.out.println(e.getMessage());
-            throw new ApiRequestException(e.getError(), e.getMessage(), e.getHttpStatus());
+            throw e;
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new ApiRequestException("Something went wrong", e.getMessage(), 404);
+            throw new ApiRequestException("Internal Server Error", e.getMessage(), 500);
         }
     }
 
@@ -93,10 +92,10 @@ public record TodosService(TodoRepository todoRepository) {
             return new TodoServiceResponse(200, Collections.singletonList(newTodo));
         } catch (ApiRequestException e) {
             System.out.println(e.getMessage());
-            throw new ApiRequestException(e.getError(), e.getMessage(), e.getHttpStatus());
+            throw e;
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new ApiRequestException("Something went wrong", e.getMessage(), 404);
+            throw new ApiRequestException("Internal Server Error", e.getMessage(), 500);
         }
     }
 
@@ -106,14 +105,14 @@ public record TodosService(TodoRepository todoRepository) {
                 throw new ApiRequestException("Invalid id", "Todo with this id does not exist", 404);
             }
 
-            Todo deletedTodo = todoRepository.getOne(Long.parseLong(todoId));
+            todoRepository.getOne(Long.parseLong(todoId));
             todoRepository.deleteById(Long.parseLong(todoId));
         } catch (ApiRequestException e) {
             System.out.println(e.getMessage());
-            throw new ApiRequestException(e.getError(), e.getMessage(), e.getHttpStatus());
+            throw e;
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new ApiRequestException("Something went wrong", e.getMessage(), 404);
+            throw new ApiRequestException("Internal Server Error", e.getMessage(), 500);
         }
     }
 
@@ -122,7 +121,7 @@ public record TodosService(TodoRepository todoRepository) {
             todoRepository.deleteTodosByUserId(userId);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new ApiRequestException("Something went wrong", e.getMessage(), 404);
+            throw new ApiRequestException("Internal Server Error", e.getMessage(), 500);
         }
     }
 }
