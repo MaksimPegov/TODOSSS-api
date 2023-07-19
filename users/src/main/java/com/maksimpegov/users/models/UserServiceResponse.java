@@ -11,13 +11,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserServiceResponse {
-    private String status;
+    private int status;
 
     private String message;
 
     private User data;
 
-    public UserServiceResponse(String status, String message) {
+    public UserServiceResponse(int status, String message) {
         this.status = status;
         this.message = message;
     }
