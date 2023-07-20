@@ -18,9 +18,13 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-  properties:
+
+  constraints:
     todos:
       url: http://todos/api/todos/v1
+    users:
+      url: http://users/api/users/v1
+      path: /api/users/v1
 
 
 eureka:

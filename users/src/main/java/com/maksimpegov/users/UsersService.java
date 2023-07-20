@@ -19,7 +19,7 @@ import java.util.Date;
 @Service
 public class UsersService {
 
-    @Value("${spring.properties.todos.url}")
+    @Value("${spring.constraints.todos.url}")
     String todoMicroserviceUrl;
 
     private final RestTemplate restTemplate;
