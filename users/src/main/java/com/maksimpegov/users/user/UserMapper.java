@@ -19,5 +19,9 @@ public interface UserMapper {
     @InheritInverseConfiguration
     User userDtoToUser(UserDto target);
 
+    @BeanMapping(ignoreByDefault = true)
+    @Mapping(target = "username", source = "username")
+    @Mapping(target = "created_at", source = "created_at")
+    UserInfo userToUserInfo(User source);
 }
 

@@ -89,11 +89,11 @@ public class TodosController {
         return httpStatus;
     }
 
-    public List<TodoDto> mapToDto(List<Todo> todos) {
+    private List<TodoDto> mapToDto(List<Todo> todos) {
         return todos.stream().map(mapper::map).toList();
     }
 
-    public List<TodoInfo> mapToTodoInfo(List<Todo> todos) {
+    private List<TodoInfo> mapToTodoInfo(List<Todo> todos) {
         return todos.stream().map(mapper::mapInfo).toList();
     }
 }

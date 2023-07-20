@@ -4,7 +4,9 @@ import com.maksimpegov.users.models.PasswordEditRequest;
 import com.maksimpegov.users.models.UserServiceResponse;
 import com.maksimpegov.users.user.User;
 import com.maksimpegov.users.user.UserDto;
+import com.maksimpegov.users.user.UserInfo;
 import com.maksimpegov.users.user.UserMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,28 +24,56 @@ public class UsersController {
     }
 
     @PostMapping(path = "/register")
-    public ResponseEntity<Object> registerUser(@RequestBody UserDto userDto) {
+    @ResponseStatus(value = HttpStatus.CREATED)
+    public void registerUser(@RequestBody UserDto userDto) {
         User user = mapper.userDtoToUser(userDto);
-        UserServiceResponse response = usersService.registerUser(user);
-        return ResponseBuilder.build(response);
+        usersService.registerUser(user);
     }
 
     @PostMapping(path = "/login")
-    public ResponseEntity<Object> loginUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> loginUser(@RequestBody UserDto userDto) {
         User user = mapper.userDtoToUser(userDto);
         UserServiceResponse response = usersService.loginUser(user);
-        return ResponseBuilder.build(response);
+        User data = response.getData();
+        HttpStatus status = getStatus(response.getStatus());
+        return ResponseEntity.status(status).body(mapUser(data));
+    }
+
+    @GetMapping(path = "/{username}")
+    public ResponseEntity<UserInfo> getUserInfo(@PathVariable String username) {
+        UserServiceResponse response = usersService.getUserInfo(username);
+        User data = response.getData();
+        HttpStatus status = getStatus(response.getStatus());
+        return ResponseEntity.status(status).body(mapToInfo(data));
     }
 
     @PatchMapping(path = "/password")
-    public ResponseEntity<Object> editPassword(@RequestBody PasswordEditRequest editRequest) {
-        UserServiceResponse response = usersService.editPassword(editRequest);
-        return ResponseBuilder.build(response);
+    @ResponseStatus(value = HttpStatus.OK)
+    public void editPassword(@RequestBody PasswordEditRequest editRequest) {
+        usersService.editPassword(editRequest);
     }
 
     @DeleteMapping
-    public ResponseEntity<Object> deleteUser(@RequestBody UserDto deleteRequest) {
-        UserServiceResponse result = usersService.deleteUser(deleteRequest);
-        return ResponseBuilder.build(result);
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deleteUser(@RequestBody UserDto deleteRequest) {
+        usersService.deleteUser(deleteRequest);
+    }
+
+    private HttpStatus getStatus(int status) {
+        HttpStatus httpStatus;
+        try {
+            httpStatus = HttpStatus.valueOf(status);
+        } catch (NumberFormatException e) {
+            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+        return httpStatus;
+    }
+
+    private UserDto mapUser(User user) {
+        return mapper.userToUserDto(user);
+    }
+
+    private UserInfo mapToInfo(User user) {
+        return mapper.userToUserInfo(user);
     }
 }
