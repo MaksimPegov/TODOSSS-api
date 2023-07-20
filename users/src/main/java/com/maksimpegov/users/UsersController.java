@@ -69,11 +69,11 @@ public class UsersController {
         return httpStatus;
     }
 
-    public UserDto mapUser(User user) {
+    private UserDto mapUser(User user) {
         return mapper.userToUserDto(user);
     }
 
-    public UserInfo mapToInfo(User user) {
+    private UserInfo mapToInfo(User user) {
         return mapper.userToUserInfo(user);
     }
 }
