@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -51,7 +52,7 @@ public class User {
     }
 
     public void hidePassword() {
-        setPassword("*".repeat(getPassword().length()));
+        setPassword(null);
     }
 
     public User(String username, String password) {
@@ -59,4 +60,8 @@ public class User {
         this.password = password.trim();
     }
 
+    public void encryptPassword() {
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        this.password = passwordEncoder.encode(password);
+    }
 }
