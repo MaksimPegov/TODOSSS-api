@@ -2,37 +2,34 @@ package com.maksimpegov.todos;
 
 import com.maksimpegov.todos.exeption.ApiRequestException;
 import com.maksimpegov.todos.models.AddTodoRequest;
-import com.maksimpegov.todos.models.TodoServiceResponse;
-import com.maksimpegov.todos.todo.Todo;
-import com.maksimpegov.todos.todo.TodoRepository;
+import com.maksimpegov.todos.todo.*;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 @Service
-public record TodosService(TodoRepository todoRepository) {
+public record TodosService(TodoRepository todoRepository, TodoMapper mapper) {
 
-    public TodoServiceResponse getTodos(Long userId) {
+    public List<TodoDto> getTodos(Long userId) {
         try {
             List<Todo> todos = todoRepository.getAllByUserId(userId);
 
-            return new TodoServiceResponse(200, todos);
+            return todos.stream().map(mapper::map).toList();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             throw new ApiRequestException("Internal Server Error", e.getMessage(), 500);
         }
     }
 
-    public TodoServiceResponse getTodoById(Long todoId) {
+    public TodoInfo getTodoInfo(Long todoId) {
         try {
             if (!todoRepository.existsById(todoId)) {
                 throw new ApiRequestException("Invalid id", "Todo with this id does not exist", 404);
             }
             Todo todo = todoRepository.getOne(todoId);
 
-            return new TodoServiceResponse(200, Collections.singletonList(todo));
+            return mapper.mapInfo(todo);
         } catch (ApiRequestException e) {
             throw e;
         } catch (Exception e) {
@@ -41,7 +38,7 @@ public record TodosService(TodoRepository todoRepository) {
         }
     }
 
-    public TodoServiceResponse addTodo(AddTodoRequest text, Long userId) {
+    public TodoDto addTodo(AddTodoRequest text, Long userId) {
         try {
             Todo todo = new Todo();
             todo.setText(text.getText());
@@ -52,7 +49,7 @@ public record TodosService(TodoRepository todoRepository) {
             }
 
             Todo createdTodo = todoRepository.save(todo);
-            return new TodoServiceResponse(201, Collections.singletonList(createdTodo));
+            return mapper.map(createdTodo);
         } catch (ApiRequestException e) {
             System.out.println(e.getMessage());
             throw e;
@@ -62,8 +59,10 @@ public record TodosService(TodoRepository todoRepository) {
         }
     }
 
-    public TodoServiceResponse editTodo(Todo newTodoPart) {
+    public TodoDto editTodo(TodoDto newTodoPartDto) {
         try {
+            Todo newTodoPart = mapper.map(newTodoPartDto);
+
             if (!todoRepository.existsById(newTodoPart.getId())) {
                 throw new ApiRequestException("Invalid id", "Todo with this id does not exist", 404);
             }
@@ -89,7 +88,7 @@ public record TodosService(TodoRepository todoRepository) {
             }
 
             Todo newTodo = todoRepository.save(oldTodo);
-            return new TodoServiceResponse(200, Collections.singletonList(newTodo));
+            return mapper.map(newTodo);
         } catch (ApiRequestException e) {
             System.out.println(e.getMessage());
             throw e;
