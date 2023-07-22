@@ -1,0 +1,47 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: todo-service
+          uri: lb://todos
+          predicates:
+            - Path=/api/todos/**
+
+        - id: user-service
+          uri: lb://users
+          predicates:
+            - Path=/api/users/**
+
+        - id: eureka-server
+          uri: http://localhost:8761
+          predicates:
+            - Path=/eureka/web
+          filters:
+            - SetPath=/
+
+        - id: eureka-server-static
+          uri: http://localhost:8761
+          predicates:
+            - Path=/eureka/**
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    root: INFO
+    org:
+      springframework:
+        cloud:
+          gateway: TRACE
+          route:
+            RouteDefinitionRouteLocator: INFO

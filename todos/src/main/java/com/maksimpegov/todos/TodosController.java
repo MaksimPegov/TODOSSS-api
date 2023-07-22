@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @Api(tags = "Endpoints")
-@RequestMapping("/api/todos/v1")
+@RequestMapping("/api/todos")
 public class TodosController {
     private final TodosService todosService;
 
@@ -22,7 +22,7 @@ public class TodosController {
     }
 
     @ApiOperation(value = "Get all todos for a user", notes = "Provide userId in path", response = TodoDto.class, responseContainer = "List")
-    @GetMapping(path = "{userId}")
+    @GetMapping(path = "/{userId}")
     public ResponseEntity<List<TodoDto>> getTodos(@PathVariable Long userId) {
         List<TodoDto> response = todosService.getTodos(userId);
         return ResponseEntity.ok(response);
