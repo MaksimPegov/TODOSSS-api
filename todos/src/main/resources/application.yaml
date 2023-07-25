@@ -22,8 +22,8 @@ spring:
 
   constraints:
     todos:
-      url: http://todos/api/todos/v1
-      path: /api/todos/v1
+      url: http://todos/api/todos
+      path: /api/todos
 
 eureka:
   client:

@@ -21,10 +21,10 @@ spring:
 
   constraints:
     todos:
-      url: http://todos/api/todos/v1
+      url: http://todos/api/todos
     users:
-      url: http://users/api/users/v1
-      path: /api/users/v1
+      url: http://users/api/users
+      path: /api/users
 
 
 eureka:
