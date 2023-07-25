@@ -1,11 +1,8 @@
 package com.maksimpegov.todos;
 
 import com.maksimpegov.todos.models.AddTodoRequest;
-import com.maksimpegov.todos.models.TodoServiceResponse;
-import com.maksimpegov.todos.todo.Todo;
 import com.maksimpegov.todos.todo.TodoDto;
 import com.maksimpegov.todos.todo.TodoInfo;
-import com.maksimpegov.todos.todo.TodoMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
@@ -18,51 +15,38 @@ import java.util.List;
 @Api(tags = "Endpoints")
 @RequestMapping("/api/todos/v1")
 public class TodosController {
-
     private final TodosService todosService;
-
-    private final TodoMapper mapper;
 
     public TodosController(TodosService todosService) {
         this.todosService = todosService;
-        this.mapper = TodoMapper.INSTANCE;
     }
 
     @ApiOperation(value = "Get all todos for a user", notes = "Provide userId in path", response = TodoDto.class, responseContainer = "List")
     @GetMapping(path = "{userId}")
     public ResponseEntity<List<TodoDto>> getTodos(@PathVariable Long userId) {
-        TodoServiceResponse response = todosService.getTodos(userId);
-        List<TodoDto> data = mapToDto(response.getData());
-        HttpStatus status = getStatus(response.getStatus());
-        return ResponseEntity.status(status).body(data);
+        List<TodoDto> response = todosService.getTodos(userId);
+        return ResponseEntity.ok(response);
     }
 
     @ApiOperation(value = "Get todo info", notes = "Provide todoId in path", response = TodoInfo.class)
     @GetMapping(path = "/todo/{todoId}")
-    public ResponseEntity<List<TodoInfo>> getTodoInfo(@PathVariable Long todoId) {
-        TodoServiceResponse response = todosService.getTodoById(todoId);
-        List<TodoInfo> data = mapToTodoInfo(response.getData());
-        HttpStatus status = getStatus(response.getStatus());
-        return ResponseEntity.status(status).body(data);
+    public ResponseEntity<TodoInfo> getTodoInfo(@PathVariable Long todoId) {
+        TodoInfo response = todosService.getTodoInfo(todoId);
+        return ResponseEntity.ok(response);
     }
 
     @ApiOperation(value = "Add a todo for a user", notes = "Provide userId in path and text of todo in body", response = TodoDto.class)
     @PostMapping(path = "{userId}")
-    public ResponseEntity<List<TodoDto>> addTodos(@RequestBody AddTodoRequest todoText, @PathVariable Long userId) {
-        TodoServiceResponse response = todosService.addTodo(todoText, userId);
-        List<TodoDto> data = mapToDto(response.getData());
-        HttpStatus status = getStatus(response.getStatus());
-        return ResponseEntity.status(status).body(data);
+    public ResponseEntity<TodoDto> addTodos(@RequestBody AddTodoRequest todoText, @PathVariable Long userId) {
+        TodoDto response = todosService.addTodo(todoText, userId);
+        return ResponseEntity.ok(response);
     }
 
     @ApiOperation(value = "Edit a todo", notes = "Provide only todoId and a todo field that you want to edit in body", response = TodoDto.class)
     @PatchMapping
-    public ResponseEntity<List<TodoDto>> editTodos(@RequestBody TodoDto newTodoPartDto) {
-        Todo newTodoPart = mapper.map(newTodoPartDto);
-        TodoServiceResponse response = todosService.editTodo(newTodoPart);
-        List<TodoDto> data = mapToDto(response.getData());
-        HttpStatus status = getStatus(response.getStatus());
-        return ResponseEntity.status(status).body(data);
+    public ResponseEntity<TodoDto> editTodos(@RequestBody TodoDto newTodoPartDto) {
+        TodoDto response = todosService.editTodo(newTodoPartDto);
+        return ResponseEntity.ok(response);
     }
 
     @ApiOperation(value = "Delete a todo", notes = "Provide todoId in path")
@@ -77,23 +61,5 @@ public class TodosController {
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void clearTodos(@PathVariable Long userId) {
         todosService.clearTodos(userId);
-    }
-
-    private HttpStatus getStatus(int status) {
-        HttpStatus httpStatus;
-        try {
-            httpStatus = HttpStatus.valueOf(status);
-        } catch (NumberFormatException e) {
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-        }
-        return httpStatus;
-    }
-
-    private List<TodoDto> mapToDto(List<Todo> todos) {
-        return todos.stream().map(mapper::map).toList();
-    }
-
-    private List<TodoInfo> mapToTodoInfo(List<Todo> todos) {
-        return todos.stream().map(mapper::mapInfo).toList();
     }
 }

@@ -3,10 +3,7 @@ package com.maksimpegov.users;
 import com.maksimpegov.users.exeption.ApiRequestException;
 import com.maksimpegov.users.models.PasswordEditRequest;
 import com.maksimpegov.users.models.UserServiceResponse;
-import com.maksimpegov.users.user.User;
-import com.maksimpegov.users.user.UserDto;
-import com.maksimpegov.users.user.UserMapper;
-import com.maksimpegov.users.user.UsersRepository;
+import com.maksimpegov.users.user.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -26,17 +23,18 @@ public class UsersService {
     private final RestTemplate restTemplate;
     private final UsersRepository usersRepository;
 
-    private final UserMapper userDTOMapper;
+    private final UserMapper mapper;
 
     @Autowired
-    public UsersService(RestTemplate restTemplate, UsersRepository usersRepository, UserMapper userDTOMapper) {
+    public UsersService(RestTemplate restTemplate, UsersRepository usersRepository, UserMapper mapper) {
         this.restTemplate = restTemplate;
         this.usersRepository = usersRepository;
-        this.userDTOMapper = userDTOMapper;
+        this.mapper = mapper;
     }
 
-    public UserServiceResponse registerUser(User user) {
+    public void registerUser(UserDto userDto) {
         try {
+            User user = mapper.userDtoToUser(userDto);
 
             if (user.getUsername() == null || user.getPassword() == null) {
                 throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
@@ -50,7 +48,6 @@ public class UsersService {
             user.encryptPassword();
             user.setCreated_at(new Date());
             usersRepository.save(user);
-            return new UserServiceResponse(201, "User created successfully");
         } catch (ApiRequestException e) {
             throw e;
         } catch (Exception e) {
@@ -58,8 +55,10 @@ public class UsersService {
         }
     }
 
-    public UserServiceResponse loginUser(User user) {
+    public UserDto loginUser(UserDto userDto) {
         try {
+            User user = mapper.userDtoToUser(userDto);
+
             if (user.getUsername() == null || user.getPassword() == null) {
                 throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
             }
@@ -75,7 +74,7 @@ public class UsersService {
             User userFromDb = usersRepository.findByUsername(user.getUsername());
 
             userFromDb.hidePassword();
-            return new UserServiceResponse(200, "User logged in successfully", userFromDb);
+            return mapper.userToUserDto(userFromDb);
         } catch (ApiRequestException e) {
             throw e;
         } catch (Exception e) {
@@ -83,7 +82,7 @@ public class UsersService {
         }
     }
 
-    public UserServiceResponse getUserInfo(String username) {
+    public UserInfo getUserInfo(String username) {
         try {
             if (username == null) {
                 throw new ApiRequestException("Invalid request", "Username is empty", 400);
@@ -96,7 +95,7 @@ public class UsersService {
             User userFromDb = usersRepository.findByUsername(username);
 
             userFromDb.hidePassword();
-            return new UserServiceResponse(200, "User info received successfully", userFromDb);
+            return mapper.userToUserInfo(userFromDb);
         } catch (ApiRequestException e) {
             throw e;
         } catch (Exception e) {
