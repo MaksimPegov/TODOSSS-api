@@ -45,3 +45,5 @@ logging:
           gateway: TRACE
           route:
             RouteDefinitionRouteLocator: INFO
+  org.springframework.cloud.gateway: DEBUG
+  reactor.netty.http.client: DEBUG

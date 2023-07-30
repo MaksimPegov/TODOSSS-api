@@ -36,7 +36,8 @@ public class UsersController {
 
     @ApiOperation(value = "Get user info", notes = "Provide username in path", response = UserInfo.class)
     @GetMapping(path = "/{username}")
-    public ResponseEntity<UserInfo> getUserInfo(@PathVariable String username) {
+    public ResponseEntity<UserInfo> getUserInfo(@PathVariable String username, @RequestHeader("Authorization") String id) {
+        System.out.println(id);
         UserInfo response = usersService.getUserInfo(username);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
