@@ -17,162 +17,169 @@ import java.util.Date;
 @Service
 public class UsersService {
 
-    @Value("${spring.constraints.todos.url}")
-    String todoMicroserviceUrl;
+	@Value("${spring.constraints.todos.url}")
+	String todoMicroserviceUrl;
 
-    private final RestTemplate restTemplate;
-    private final UsersRepository usersRepository;
+	@Value("${spring.constraints.security.url}")
+	String securityMicroserviceUrl;
 
-    private final UserMapper mapper;
+	private final RestTemplate restTemplate;
+	private final UsersRepository usersRepository;
 
-    @Autowired
-    public UsersService(RestTemplate restTemplate, UsersRepository usersRepository, UserMapper mapper) {
-        this.restTemplate = restTemplate;
-        this.usersRepository = usersRepository;
-        this.mapper = mapper;
-    }
+	private final UserMapper mapper;
 
-    public void registerUser(UserDto userDto) {
-        try {
-            User user = mapper.userDtoToUser(userDto);
+	@Autowired
+	public UsersService(RestTemplate restTemplate, UsersRepository usersRepository, UserMapper mapper) {
+		this.restTemplate = restTemplate;
+		this.usersRepository = usersRepository;
+		this.mapper = mapper;
+	}
 
-            if (user.getUsername() == null || user.getPassword() == null) {
-                throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
-            } else if (!user.userValidation()) {
-                throw new ApiRequestException("Invalid request", "Username or password is not valid. Username: min 3 symbols, password: min 6 symbols)", 400);
+	public void registerUser(UserDto userDto) {
+		try {
+			User user = mapper.userDtoToUser(userDto);
 
-            } else if (usersRepository.findByUsername(user.getUsername()) != null) {
-                throw new ApiRequestException("Conflict", "User with this username already exists", 409);
-            }
+			if (user.getUsername() == null || user.getPassword() == null) {
+				throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
+			} else if (!user.userValidation()) {
+				throw new ApiRequestException("Invalid request", "Username or password is not valid. Username: min 3 symbols, password: min 6 symbols)", 400);
 
-            user.encryptPassword();
-            user.setCreated_at(new Date());
-            usersRepository.save(user);
-        } catch (ApiRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ApiRequestException("Internal server error", e.getMessage(), 500);
-        }
-    }
+			} else if (usersRepository.findByUsername(user.getUsername()) != null) {
+				throw new ApiRequestException("Conflict", "User with this username already exists", 409);
+			}
 
-    public UserDto loginUser(UserDto userDto) {
-        try {
-            User user = mapper.userDtoToUser(userDto);
+			user.encryptPassword();
+			user.setCreated_at(new Date());
+			usersRepository.save(user);
+		} catch (ApiRequestException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ApiRequestException("Internal server error", e.getMessage(), 500);
+		}
+	}
 
-            if (user.getUsername() == null || user.getPassword() == null) {
-                throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
-            }
+	public String loginUser(UserDto userDto) {
+		try {
+			User user = mapper.userDtoToUser(userDto);
 
-            if (!isUserExists(user.getUsername())) {
-                throw new ApiRequestException("Not found", "User with this username does not exist", 404);
-            }
+			if (user.getUsername() == null || user.getPassword() == null) {
+				throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
+			}
 
-            if (!passwordVerification(user.getUsername(), user.getPassword())) {
-                throw new ApiRequestException("Unauthorized", "Wrong password", 401);
-            }
+			if (!isUserExists(user.getUsername())) {
+				throw new ApiRequestException("Not found", "User with this username does not exist", 404);
+			}
 
-            User userFromDb = usersRepository.findByUsername(user.getUsername());
+			if (!passwordVerification(user.getUsername(), user.getPassword())) {
+				throw new ApiRequestException("Unauthorized", "Wrong password", 401);
+			}
 
-            userFromDb.hidePassword();
-            return mapper.userToUserDto(userFromDb);
-        } catch (ApiRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ApiRequestException("Internal server error", e.getMessage(), 500);
-        }
-    }
+			User userFromDb = usersRepository.findByUsername(user.getUsername());
 
-    public UserInfo getUserInfo(String username) {
-        try {
-            if (username == null) {
-                throw new ApiRequestException("Invalid request", "Username is empty", 400);
-            }
+			String url = securityMicroserviceUrl + "/" + userFromDb.getId();
+			ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, null, String.class);
+			String token = response.getBody();
 
-            if (!isUserExists(username)) {
-                throw new ApiRequestException("Not found", "User with this username does not exist", 404);
-            }
+			userFromDb.hidePassword();
+			return token;
+		} catch (ApiRequestException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ApiRequestException("Internal server error", e.getMessage(), 500);
+		}
+	}
 
-            User userFromDb = usersRepository.findByUsername(username);
+	public UserInfo getUserInfo(String username) {
+		try {
+			if (username == null) {
+				throw new ApiRequestException("Invalid request", "Username is empty", 400);
+			}
 
-            userFromDb.hidePassword();
-            return mapper.userToUserInfo(userFromDb);
-        } catch (ApiRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ApiRequestException("Internal server error", e.getMessage(), 500);
-        }
-    }
+			if (!isUserExists(username)) {
+				throw new ApiRequestException("Not found", "User with this username does not exist", 404);
+			}
 
-    public void editPassword(PasswordEditRequest editRequest) {
-        try {
-            if (editRequest.getUsername() == null || editRequest.getOldPassword() == null || editRequest.getNewPassword() == null) {
-                throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
-            }
+			User userFromDb = usersRepository.findByUsername(username);
 
-            if (!isUserExists(editRequest.getUsername())) {
-                throw new ApiRequestException("Not found", "User with this username does not exist", 404);
-            }
+			userFromDb.hidePassword();
+			return mapper.userToUserInfo(userFromDb);
+		} catch (ApiRequestException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ApiRequestException("Internal server error", e.getMessage(), 500);
+		}
+	}
 
-            if (!passwordVerification(editRequest.getUsername(), editRequest.getOldPassword())) {
-                throw new ApiRequestException("Unauthorized", "You provided wrong old password", 401);
-            }
+	public void editPassword(PasswordEditRequest editRequest) {
+		try {
+			if (editRequest.getUsername() == null || editRequest.getOldPassword() == null || editRequest.getNewPassword() == null) {
+				throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
+			}
 
-            User userFromDb = usersRepository.findByUsername(editRequest.getUsername());
-            userFromDb.setPassword(editRequest.getNewPassword());
-            userFromDb.encryptPassword();
+			if (!isUserExists(editRequest.getUsername())) {
+				throw new ApiRequestException("Not found", "User with this username does not exist", 404);
+			}
 
-            if (!userFromDb.userValidation()) {
-                throw new ApiRequestException("Invalid request", "New password is not valid. Password: min 6 symbols", 400);
-            }
-            usersRepository.save(userFromDb); // everything is ok, save new password
-        } catch (ApiRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ApiRequestException("Internal server error", e.getMessage(), 500);
-        }
-    }
+			if (!passwordVerification(editRequest.getUsername(), editRequest.getOldPassword())) {
+				throw new ApiRequestException("Unauthorized", "You provided wrong old password", 401);
+			}
 
-    public void deleteUser(UserDto deleteRequest) {
-        try {
-            if (deleteRequest.getUsername() == null || deleteRequest.getPassword() == null) {
-                throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
-            }
+			User userFromDb = usersRepository.findByUsername(editRequest.getUsername());
+			userFromDb.setPassword(editRequest.getNewPassword());
+			userFromDb.encryptPassword();
 
-            if (!isUserExists(deleteRequest.getUsername())) {
-                throw new ApiRequestException("Not found", "User with this username does not exist", 404);
-            }
+			if (!userFromDb.userValidation()) {
+				throw new ApiRequestException("Invalid request", "New password is not valid. Password: min 6 symbols", 400);
+			}
+			usersRepository.save(userFromDb); // everything is ok, save new password
+		} catch (ApiRequestException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ApiRequestException("Internal server error", e.getMessage(), 500);
+		}
+	}
 
-            if (!passwordVerification(deleteRequest.getUsername(), deleteRequest.getPassword())) {
-                throw new ApiRequestException("Unauthorized", "Wrong password", 401);
-            }
+	public void deleteUser(UserDto deleteRequest) {
+		try {
+			if (deleteRequest.getUsername() == null || deleteRequest.getPassword() == null) {
+				throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
+			}
 
-            User user = usersRepository.findByUsername(deleteRequest.getUsername());
+			if (!isUserExists(deleteRequest.getUsername())) {
+				throw new ApiRequestException("Not found", "User with this username does not exist", 404);
+			}
 
-            String url = todoMicroserviceUrl + "/clear/" + user.getId();
+			if (!passwordVerification(deleteRequest.getUsername(), deleteRequest.getPassword())) {
+				throw new ApiRequestException("Unauthorized", "Wrong password", 401);
+			}
 
-            // request to todos-microservice to delete all todos of this user
-            ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
+			User user = usersRepository.findByUsername(deleteRequest.getUsername());
 
-            if (response.getStatusCodeValue() < 400) {
-                usersRepository.delete(user);
-                new UserServiceResponse(204, "User deleted successfully");
-                return;
-            }
-            new UserServiceResponse(response.getStatusCodeValue(), "Unable to delete user todos");
-        } catch (ApiRequestException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ApiRequestException("Internal server error", e.getMessage(), 500);
-        }
-    }
+			String url = todoMicroserviceUrl + "/clear/" + user.getId();
 
-    private boolean isUserExists(String username) {
-        return usersRepository.findByUsername(username) != null;
-    }
+			// request to todos-microservice to delete all todos of this user
+			ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
 
-    private boolean passwordVerification(String username, String password) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String truePassword = usersRepository.findByUsername(username).getPassword();
-        return passwordEncoder.matches(password, truePassword);
-    }
+			if (response.getStatusCodeValue() < 400) {
+				usersRepository.delete(user);
+				new UserServiceResponse(204, "User deleted successfully");
+				return;
+			}
+			new UserServiceResponse(response.getStatusCodeValue(), "Unable to delete user todos");
+		} catch (ApiRequestException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ApiRequestException("Internal server error", e.getMessage(), 500);
+		}
+	}
+
+	private boolean isUserExists(String username) {
+		return usersRepository.findByUsername(username) != null;
+	}
+
+	private boolean passwordVerification(String username, String password) {
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		String truePassword = usersRepository.findByUsername(username).getPassword();
+		return passwordEncoder.matches(password, truePassword);
+	}
 }
