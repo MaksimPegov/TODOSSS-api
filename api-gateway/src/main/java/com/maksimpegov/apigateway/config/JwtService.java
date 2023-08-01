@@ -3,7 +3,6 @@ package com.maksimpegov.apigateway.config;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
@@ -14,17 +13,15 @@ import java.util.function.Function;
 @Component
 public class JwtService {
 
-	private static final String SECRET_KEY = "A87BDAE5D4DAB6FFF72729EE1D82D";
+	private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
+	private static final Key SECRET_KEY = Keys.secretKeyFor(SIGNATURE_ALGORITHM);
 
 	public String generateToken(String userId) {
-
-		return Jwts
-				.builder()
-//                .setClaims(Map.of("userId", userId)) if we wat to add extra claims
+		return Jwts.builder()
 				.setSubject(userId)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
-				.signWith(getSignIngKey(), SignatureAlgorithm.ES256)
+				.setExpiration(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000)) // 24 hours
+				.signWith(SECRET_KEY, SIGNATURE_ALGORITHM)
 				.compact();
 	}
 
@@ -38,7 +35,11 @@ public class JwtService {
 	}
 
 	public Boolean isTokenValid(String jwt) {
-		return !isTokenExpired(jwt);
+		try {
+			return !isTokenExpired(jwt);
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 	private boolean isTokenExpired(String jwt) {
@@ -50,16 +51,10 @@ public class JwtService {
 	}
 
 	private Claims getAllClaims(String jwt) {
-		return Jwts
-				.parserBuilder()
-				.setSigningKey("getSignIngKey()")
+		return Jwts.parserBuilder()
+				.setSigningKey(SECRET_KEY)
 				.build()
 				.parseClaimsJws(jwt)
 				.getBody();
-	}
-
-	private Key getSignIngKey() {
-		byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-		return Keys.hmacShaKeyFor(keyBytes);
 	}
 }

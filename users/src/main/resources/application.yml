@@ -25,6 +25,9 @@ spring:
     users:
       url: http://users/api/users
       path: /api/users
+    security:
+      url: http://api-gateway/api/security
+      path: /api/security
 
 
 eureka:

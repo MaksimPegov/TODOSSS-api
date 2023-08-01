@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -40,17 +39,25 @@ public class AuthWebFilter implements GlobalFilter {
 			return response.setComplete();
 		}
 
-		// Modify an existing header
+		// If the header value is not a valid JWT, abort the request
 		String existingHeader = headers.getFirst(headerName);
 		if (!jwtService.isTokenValid(existingHeader)) {
 			response.setStatusCode(HttpStatus.UNAUTHORIZED);
 			return response.setComplete();
 		}
 
+		// Change JWT header value to user id
 		String modifiedHeaderValue = jwtService.getUserId(existingHeader);
-		headers.set(headerName, modifiedHeaderValue);
 
-		// Continue the filter chain
-		return chain.filter(exchange);
+		// Create a new HttpHeaders object with the modified header value
+		HttpHeaders modifiedHeaders = new HttpHeaders();
+		modifiedHeaders.putAll(headers);
+		modifiedHeaders.set(headerName, modifiedHeaderValue);
+
+		// Create a new ServerHttpRequest with the modified headers
+		ServerHttpRequest modifiedRequest = request.mutate().headers(httpHeaders -> httpHeaders.addAll(modifiedHeaders)).build();
+
+		// Continue the filter chain with the modified request
+		return chain.filter(exchange.mutate().request(modifiedRequest).build());
 	}
 }
