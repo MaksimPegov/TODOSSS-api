@@ -5,6 +5,12 @@ spring:
   application:
     name: api-gateway
 
+  constraints:
+    blockedPath:
+      clearTodos: todos/clear
+      createToken: api/security
+    userMicroserviceIdentifier: secret-key
+
   cloud:
     gateway:
       routes:

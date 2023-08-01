@@ -6,6 +6,8 @@ import com.maksimpegov.users.models.UserServiceResponse;
 import com.maksimpegov.users.user.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +24,9 @@ public class UsersService {
 
 	@Value("${spring.constraints.security.url}")
 	String securityMicroserviceUrl;
+
+	@Value("${spring.constraints.userMicroserviceIdentifier}")
+	private String USER_MICROSERVICE_IDENTIFIER;
 
 	private final RestTemplate restTemplate;
 	private final UsersRepository usersRepository;
@@ -76,8 +81,13 @@ public class UsersService {
 
 			User userFromDb = usersRepository.findByUsername(user.getUsername());
 
+			// Setting up headers for security microservice
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Authorization", USER_MICROSERVICE_IDENTIFIER);
+			HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
+
 			String url = securityMicroserviceUrl + "/" + userFromDb.getId();
-			ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, null, String.class);
+			ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, httpEntity, String.class);
 			String token = response.getBody();
 
 			userFromDb.hidePassword();
