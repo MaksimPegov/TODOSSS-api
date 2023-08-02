@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class TodosController {
         todosService.deleteTodo(todoId);
     }
 
-    @ApiOperation(value = "Delete all todos for a user", notes = "Provide userId in path")
+    @ApiIgnore
     @DeleteMapping(path = "/clear/{userId}")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void clearTodos(@PathVariable Long userId) {

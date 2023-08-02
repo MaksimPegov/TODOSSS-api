@@ -28,6 +28,7 @@ spring:
     security:
       url: http://api-gateway/api/security
       path: /api/security
+    userMicroserviceIdentifier: secret-key
 
 
 eureka:
