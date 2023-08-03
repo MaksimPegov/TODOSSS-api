@@ -15,15 +15,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
+import java.util.Optional;
 
 @Service
 public class UsersService {
-
 	@Value("${spring.constraints.todos.url}")
-	String todoMicroserviceUrl;
+	private String todoMicroserviceUrl;
 
 	@Value("${spring.constraints.security.url}")
-	String securityMicroserviceUrl;
+	private String securityMicroserviceUrl;
 
 	@Value("${spring.constraints.userMicroserviceIdentifier}")
 	private String USER_MICROSERVICE_IDENTIFIER;
@@ -99,17 +99,9 @@ public class UsersService {
 		}
 	}
 
-	public UserInfo getUserInfo(String username) {
+	public UserInfo getUserInfo(Long id) {
 		try {
-			if (username == null) {
-				throw new ApiRequestException("Invalid request", "Username is empty", 400);
-			}
-
-			if (!isUserExists(username)) {
-				throw new ApiRequestException("Not found", "User with this username does not exist", 404);
-			}
-
-			User userFromDb = usersRepository.findByUsername(username);
+			User userFromDb = usersRepository.findById(id).get();
 
 			userFromDb.hidePassword();
 			return mapper.userToUserInfo(userFromDb);
@@ -149,26 +141,22 @@ public class UsersService {
 		}
 	}
 
-	public void deleteUser(UserDto deleteRequest) {
+	public void deleteUser(Long userId) {
 		try {
-			if (deleteRequest.getUsername() == null || deleteRequest.getPassword() == null) {
-				throw new ApiRequestException("Invalid request", "Username or password is empty", 400);
+			Optional<User> optionalUser = usersRepository.findById(userId);
+			if (optionalUser.isEmpty()) {
+				throw new ApiRequestException("Not found", "User with this id does not exist", 404);
 			}
+			User user = optionalUser.get();
 
-			if (!isUserExists(deleteRequest.getUsername())) {
-				throw new ApiRequestException("Not found", "User with this username does not exist", 404);
-			}
-
-			if (!passwordVerification(deleteRequest.getUsername(), deleteRequest.getPassword())) {
-				throw new ApiRequestException("Unauthorized", "Wrong password", 401);
-			}
-
-			User user = usersRepository.findByUsername(deleteRequest.getUsername());
-
-			String url = todoMicroserviceUrl + "/clear/" + user.getId();
+			// Setting up request for todos microservice
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("userId", String.valueOf(user.getId()));
+			HttpEntity<Object> httpEntity = new HttpEntity<>(headers);
+			String url = todoMicroserviceUrl + "/clear";
 
 			// request to todos-microservice to delete all todos of this user
-			ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
+			ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, httpEntity, Void.class);
 
 			if (response.getStatusCodeValue() < 400) {
 				usersRepository.delete(user);
