@@ -1,8 +1,11 @@
 package com.maksimpegov.apigateway.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -12,8 +15,10 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @Component
-public class AuthWebFilter implements GlobalFilter {
+public class AuthWebFilter implements GlobalFilter, Ordered {
 	private JwtService jwtService;
+
+	final Logger logger = LoggerFactory.getLogger(AuthWebFilter.class);
 
 	@Autowired
 	public AuthWebFilter(JwtService jwtService) {
@@ -26,6 +31,9 @@ public class AuthWebFilter implements GlobalFilter {
 		ServerHttpResponse response = exchange.getResponse();
 		HttpHeaders headers = request.getHeaders();
 		String headerName = "Authorization";
+		String newHeader = "userId";
+
+		logger.info("New request to: " + request.getPath());
 
 		// Allow the request for login and register
 		String requestUri = request.getPath().toString();
@@ -45,19 +53,24 @@ public class AuthWebFilter implements GlobalFilter {
 			response.setStatusCode(HttpStatus.UNAUTHORIZED);
 			return response.setComplete();
 		}
+		logger.info("Security check passed");
 
-		// Change JWT header value to user id
-		String modifiedHeaderValue = jwtService.getUserId(existingHeader);
+		logger.info("Headers before:" + headers);
 
-		// Create a new HttpHeaders object with the modified header value
-		HttpHeaders modifiedHeaders = new HttpHeaders();
-		modifiedHeaders.putAll(headers);
-		modifiedHeaders.set(headerName, modifiedHeaderValue);
+		// User ID is extracted from the JWT
+		String userId = jwtService.getUserId(existingHeader);
 
 		// Create a new ServerHttpRequest with the modified headers
-		ServerHttpRequest modifiedRequest = request.mutate().headers(httpHeaders -> httpHeaders.addAll(modifiedHeaders)).build();
+		ServerHttpRequest modifiedRequest = request.mutate().headers(httpHeaders -> httpHeaders.add(newHeader, userId)).build();
+
+		logger.info("Updated headers: " + modifiedRequest.getHeaders());
 
 		// Continue the filter chain with the modified request
 		return chain.filter(exchange.mutate().request(modifiedRequest).build());
+	}
+
+	@Override
+	public int getOrder() {
+		return 1;
 	}
 }
