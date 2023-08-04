@@ -101,10 +101,15 @@ public class UsersService {
 
 	public UserInfo getUserInfo(Long id) {
 		try {
-			User userFromDb = usersRepository.findById(id).get();
+			Optional<User> userFromDb = usersRepository.findById(id);
 
-			userFromDb.hidePassword();
-			return mapper.userToUserInfo(userFromDb);
+			if (userFromDb.isEmpty()) {
+				throw new ApiRequestException("Not found", "User with this id does not exist", 404);
+			}
+			User user = userFromDb.get();
+
+			user.hidePassword();
+			return mapper.userToUserInfo(user);
 		} catch (ApiRequestException e) {
 			throw e;
 		} catch (Exception e) {
