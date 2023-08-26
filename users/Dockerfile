@@ -8,7 +8,7 @@ WORKDIR /app
 COPY target/users-1.0-SNAPSHOT.jar app.jar
 
 # Expose the port that your microservice listens on
-EXPOSE 8081
+EXPOSE 1002
 
 # Specify the command to run when the container starts
 CMD ["java", "-jar", "app.jar"]

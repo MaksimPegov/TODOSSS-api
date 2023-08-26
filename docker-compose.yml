@@ -13,7 +13,7 @@ services:
     build:
       context: ./api-gateway
     ports:
-      - "8083:8083"
+      - "1001:1001"
     networks:
       - todo-network
     depends_on:
@@ -23,7 +23,7 @@ services:
     build:
       context: ./todos
     ports:
-      - "8082:8082"
+      - "1003:1003"
     networks:
       - todo-network
     depends_on:
@@ -34,7 +34,7 @@ services:
     build:
       context: ./users
     ports:
-      - "8081:8081"
+      - "1002:1002"
     networks:
       - todo-network
     depends_on:
