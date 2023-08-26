@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  eureka-server:
+    build:
+      context: ./eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - todo-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "8083:8083"
+    networks:
+      - todo-network
+    depends_on:
+      - eureka-server
+
+  todos:
+    build:
+      context: ./todos
+    ports:
+      - "8082:8082"
+    networks:
+      - todo-network
+    depends_on:
+      - eureka-server
+      - todos-db
+
+  users:
+    build:
+      context: ./users
+    ports:
+      - "8081:8081"
+    networks:
+      - todo-network
+    depends_on:
+      - eureka-server
+      - users-db
+
+  todos-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: tododb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwer1234
+    volumes:
+      - pg-todos-data:/var/lib/postgresql/data
+    networks:
+      - todo-network
+
+  users-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: usersdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwer1234
+    volumes:
+      - pg-users-data:/var/lib/postgresql/data
+    networks:
+      - todo-network
+
+networks:
+  todo-network:
+
+volumes:
+  pg-todos-data:
+  pg-users-data:
