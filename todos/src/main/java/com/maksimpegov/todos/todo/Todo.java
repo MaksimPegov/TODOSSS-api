@@ -50,7 +50,6 @@ public class Todo {
         return this.text.length() > 0;
     }
 
-    // constructor for creating new Todo
     public Todo(String text, Long userId, Date createdAt) {
         this.text = text;
         this.userId = userId;
