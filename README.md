@@ -30,6 +30,9 @@ TodoAPI embraces the power of microservices to provide a scalable and maintainab
 
 ## Usage
 
+<span style="font-size: larger;">**Important: All requests must be sent through the API Gateway: `http://104.248.166.249:1001/`**</span>
+
+
 Accessing the endpoints and functionalities of TodoAPI requires a valid JSON Web Token (JWT) in the "Authorization" header of your requests. To obtain a JWT token:
 
 1. Register a user account.
