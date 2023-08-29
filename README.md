@@ -49,7 +49,7 @@ Swagger UI provides a comprehensive interface to explore and interact with the T
 
 ## Contributing
 
-We welcome contributions to enhance TodoAPI. To contribute, follow these steps:
+We welcome contributions to enhance api. To contribute, follow these steps:
 
 1. Fork this repository.
 2. Create a new branch: `git checkout -b feature/your-feature-name`
